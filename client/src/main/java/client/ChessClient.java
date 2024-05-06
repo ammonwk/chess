@@ -28,4 +28,9 @@ public class ChessClient {
         server = new ServerFacade(serverUrl);
         return server.loginUser(new LoginRequest(username, password)).authToken();
     }
+
+    public Object logout(String authToken) throws DataAccessException {
+        server = new ServerFacade(serverUrl);
+        return server.logoutUser(authToken);
+    }
 }

@@ -94,7 +94,18 @@ public class Repl {
         try {
             int choice = scanner.nextInt();
             switch (choice) {
-                
+                case 1:
+                    System.out.println("Choose 3 to see what games are in action, or 4 to get one started!");
+                    break;
+                case 2:
+                    try {
+                        client.logout(authToken);
+                        System.out.println("Logged out successfully.");
+                        this.username = null;
+                    } catch (DataAccessException e) {
+                        System.out.println(SET_TEXT_COLOR_RED + "Error in logging out: " + e.getMessage() + SET_TEXT_COLOR_WHITE);
+                    }
+                    break;
                 default:
                     System.out.println("Invalid choice. Please select a number between 1 and 4");
             }
