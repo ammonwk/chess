@@ -52,14 +52,14 @@ public class ChessPiece {
                 return new RookMovesCalculator();
             case BISHOP:
                 return new BishopMovesCalculator();
-//            case "Knight":
-//                return new KnightMovesCalculator();
-//            case "Queen":
-//                return new QueenMovesCalculator();
-//            case "King":
-//                return new KingMovesCalculator();
-//            case "Pawn":
-//                return new PawnMovesCalculator();
+            case KNIGHT:
+                return new KnightMovesCalculator();
+            case QUEEN:
+                return new QueenMovesCalculator();
+            case KING:
+                return new KingMovesCalculator();
+            case PAWN:
+                return new PawnMovesCalculator();
             default:
                 throw new IllegalArgumentException("Invalid piece type: " + type);
         }
