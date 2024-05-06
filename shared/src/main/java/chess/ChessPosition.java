@@ -31,4 +31,21 @@ public class ChessPosition {
     public int getColumn() {
         return this.col;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || this.getClass() != obj.getClass()) {
+            return false;
+        }
+        ChessPosition other = (ChessPosition) obj;
+        return this.row == other.row && this.col == other.col;
+    }
+
+    @Override
+    public String toString() {
+        return "(" + this.row + ", " + this.col + ")";
+    }
 }
