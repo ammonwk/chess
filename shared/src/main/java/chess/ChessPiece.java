@@ -75,4 +75,35 @@ public class ChessPiece {
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
         return movesCalculator.calculateMoves(board, myPosition);
     }
+
+    @Override
+    public String toString() {
+        String returnValue;
+        switch (this.type) {
+            case KING:
+                returnValue = "K";
+                break;
+            case QUEEN:
+                returnValue = "Q";
+                break;
+            case BISHOP:
+                returnValue = "B";
+                break;
+            case KNIGHT:
+                returnValue = "N";
+                break;
+            case ROOK:
+                returnValue = "R";
+                break;
+            case PAWN:
+                returnValue = "P";
+                break;
+        default:
+            throw new RuntimeException(this.type + " is not a valid piece type");
+        }
+        if (this.pieceColor == ChessGame.TeamColor.BLACK) {
+            returnValue = returnValue.toLowerCase();
+        }
+        return returnValue;
+    }
 }
