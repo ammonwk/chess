@@ -50,8 +50,8 @@ public class ChessPiece {
         switch (type) {
             case ROOK:
                 return new RookMovesCalculator();
-//            case "Bishop":
-//                return new BishopMovesCalculator();
+            case BISHOP:
+                return new BishopMovesCalculator();
 //            case "Knight":
 //                return new KnightMovesCalculator();
 //            case "Queen":
