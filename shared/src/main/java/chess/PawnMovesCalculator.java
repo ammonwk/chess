@@ -8,7 +8,7 @@ public class PawnMovesCalculator implements PieceMovesCalculator {
         ArrayList<ChessMove> movesToReturn = new ArrayList<>();
         ChessGame.TeamColor myColor = board.getPiece(myPosition).getTeamColor();
         int yDir = myColor == ChessGame.TeamColor.BLACK ? -1 : 1;
-        ChessPosition oneUp = new ChessPosition(myPosition.getRow() + 1 * yDir + 1, myPosition.getColumn() + 1);
+        ChessPosition oneUp = new ChessPosition(myPosition.getRow() + yDir + 1, myPosition.getColumn() + 1);
         if(board.getPiece(oneUp) == null) {
             movesToReturn.add(new ChessMove(myPosition, oneUp, null));
             if (myPosition.getRow() == 3.5 - 2.5 * yDir) {
@@ -18,11 +18,11 @@ public class PawnMovesCalculator implements PieceMovesCalculator {
                 }
             }
         }
-        ChessPosition upLeft = new ChessPosition(myPosition.getRow() + 1 * yDir + 1, myPosition.getColumn());
+        ChessPosition upLeft = new ChessPosition(myPosition.getRow() + yDir + 1, myPosition.getColumn());
         if(board.getPiece(upLeft) != null && board.getPiece(upLeft).getTeamColor() != myColor) {
             movesToReturn.add(new ChessMove(myPosition, upLeft, null));
         }
-        ChessPosition upRight = new ChessPosition(myPosition.getRow() + 1 * yDir + 1, myPosition.getColumn() + 2);
+        ChessPosition upRight = new ChessPosition(myPosition.getRow() + yDir + 1, myPosition.getColumn() + 2);
         if(board.getPiece(upRight) != null && board.getPiece(upRight).getTeamColor() != myColor) {
             movesToReturn.add(new ChessMove(myPosition, upRight, null));
         }
