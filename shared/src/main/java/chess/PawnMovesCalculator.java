@@ -18,13 +18,17 @@ public class PawnMovesCalculator implements PieceMovesCalculator {
                 }
             }
         }
-        ChessPosition upLeft = new ChessPosition(myPosition.getRow() + yDir + 1, myPosition.getColumn());
-        if(board.getPiece(upLeft) != null && board.getPiece(upLeft).getTeamColor() != myColor) {
-            movesToReturn.add(new ChessMove(myPosition, upLeft, null));
+        if(myPosition.getColumn() > 0) {
+            ChessPosition upLeft = new ChessPosition(myPosition.getRow() + yDir + 1, myPosition.getColumn());
+            if (board.getPiece(upLeft) != null && board.getPiece(upLeft).getTeamColor() != myColor) {
+                movesToReturn.add(new ChessMove(myPosition, upLeft, null));
+            }
         }
-        ChessPosition upRight = new ChessPosition(myPosition.getRow() + yDir + 1, myPosition.getColumn() + 2);
-        if(board.getPiece(upRight) != null && board.getPiece(upRight).getTeamColor() != myColor) {
-            movesToReturn.add(new ChessMove(myPosition, upRight, null));
+        if (myPosition.getColumn() + 2 < 7) {
+            ChessPosition upRight = new ChessPosition(myPosition.getRow() + yDir + 1, myPosition.getColumn() + 2);
+            if (board.getPiece(upRight) != null && board.getPiece(upRight).getTeamColor() != myColor) {
+                movesToReturn.add(new ChessMove(myPosition, upRight, null));
+            }
         }
         ArrayList<ChessMove> withPromotions = new ArrayList<>();
         for (ChessMove move : movesToReturn) { // Promotions
