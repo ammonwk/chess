@@ -13,10 +13,10 @@ public class BishopMovesCalculator implements PieceMovesCalculator {
             while (true) {
                 peekPoint[0] += direction[0];
                 peekPoint[1] += direction[1];
-                if (peekPoint[0] > 8 || peekPoint[1] > 8 || peekPoint[0] < 1 || peekPoint[1] < 1) {
+                if (peekPoint[0] > 7 || peekPoint[1] > 7 || peekPoint[0] < 0 || peekPoint[1] < 0) {
                     break; // Don't go off the board
                 }
-                ChessPosition here = new ChessPosition(peekPoint[0], peekPoint[1]);
+                ChessPosition here = new ChessPosition(peekPoint[0] + 1, peekPoint[1] + 1);
                 if (board.getPiece(here) == null) {
                     movesToReturn.add(new ChessMove(myPosition, here, null));
                     // Continue

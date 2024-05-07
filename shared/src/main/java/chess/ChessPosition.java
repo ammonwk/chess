@@ -12,8 +12,8 @@ public class ChessPosition {
     private int col;
 
     public ChessPosition(int row, int col) {
-        this.row = row;
-        this.col = col;
+        this.row = row - 1; // Subtract 1 to convert from 1-based to 0-based index
+        this.col = col - 1; // Subtract 1 to convert from 1-based to 0-based index
     }
 
     /**
@@ -21,7 +21,7 @@ public class ChessPosition {
      * 1 codes for the bottom row
      */
     public int getRow() {
-        return this.row;
+        return this.row; // Add 1 to convert back to 1-based index
     }
 
     /**
@@ -29,7 +29,7 @@ public class ChessPosition {
      * 1 codes for the left row
      */
     public int getColumn() {
-        return this.col;
+        return this.col; // Add 1 to convert back to 1-based index
     }
 
     @Override
