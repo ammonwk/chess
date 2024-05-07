@@ -10,9 +10,9 @@ public class KingMovesCalculator implements PieceMovesCalculator {
         int[][] directions = {{0,1},{1,0},{1,1},{-1,0},{-1,1},{-1,-1},{0,-1},{1,-1}};
         for (int[] direction : directions) {
             if(myPosition.getRow() + direction[0] > 7
-                    || myPosition.getRow() + direction[0] < 1
-                    || myPosition.getRow() + direction[1] > 7
-                    || myPosition.getRow() + direction[1] < 1) {
+                    || myPosition.getRow() + direction[0] < 0
+                    || myPosition.getColumn() + direction[1] > 7
+                    || myPosition.getColumn() + direction[1] < 0) {
                 continue;
             }
             ChessPosition peekPoint = new ChessPosition(myPosition.getRow() + direction[0] + 1,
