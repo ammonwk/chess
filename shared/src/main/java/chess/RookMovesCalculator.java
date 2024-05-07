@@ -7,7 +7,7 @@ public class RookMovesCalculator implements PieceMovesCalculator {
     public Collection<ChessMove> calculateMoves(ChessBoard board, ChessPosition myPosition) {
         ArrayList<ChessMove> movesToReturn = new ArrayList<>();
         ChessGame.TeamColor myColor = board.getPiece(myPosition).getTeamColor();
-        int[][] directions = {{1,0}, {0,1}, {-1,0}, {0,-1}};
+        int[][] directions = {{1,0}, {0,-1}, {-1,0}, {0,1}};
         for (int[] direction : directions) {
             int[] peekPoint = {myPosition.getRow(), myPosition.getColumn()};
             while (true) {

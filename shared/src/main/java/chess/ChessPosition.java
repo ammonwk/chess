@@ -48,4 +48,11 @@ public class ChessPosition {
     public String toString() {
         return "(" + this.row + ", " + this.col + ")";
     }
+
+    @Override
+    public int hashCode() {
+        int result = row;
+        result = 31 * result + col;
+        return result;
+    }
 }

@@ -61,4 +61,12 @@ public class ChessMove {
     public String toString() {
         return "{" + this.startPosition + ", " + this.endPosition + ", " + this.promotionPiece + "}";
     }
+
+    @Override
+    public int hashCode() {
+        int result = startPosition != null ? startPosition.hashCode() : 0;
+        result = 31 * result + (endPosition != null ? endPosition.hashCode() : 0);
+        result = 31 * result + (promotionPiece != null ? promotionPiece.hashCode() : 0);
+        return result;
+    }
 }
