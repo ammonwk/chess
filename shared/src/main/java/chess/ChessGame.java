@@ -1,5 +1,8 @@
 package chess;
 
+import org.junit.jupiter.api.Assertions;
+
+import java.util.ArrayList;
 import java.util.Collection;
 
 /**
@@ -10,15 +13,20 @@ import java.util.Collection;
  */
 public class ChessGame {
 
-    public ChessGame() {
+    private TeamColor turn;
+    private ChessBoard board;
 
+    public ChessGame() {
+        turn = TeamColor.WHITE;
+        board = new ChessBoard();
+        board.resetBoard();
     }
 
     /**
      * @return Which team's turn it is
      */
     public TeamColor getTeamTurn() {
-        throw new RuntimeException("Not implemented");
+        return turn;
     }
 
     /**
@@ -27,7 +35,7 @@ public class ChessGame {
      * @param team the team whose turn it is
      */
     public void setTeamTurn(TeamColor team) {
-        throw new RuntimeException("Not implemented");
+        turn = team;
     }
 
     /**
@@ -46,7 +54,18 @@ public class ChessGame {
      * startPosition
      */
     public Collection<ChessMove> validMoves(ChessPosition startPosition) {
-        throw new RuntimeException("Not implemented");
+        Collection<ChessMove> movesToReturn = new ArrayList<>();
+        for(int i = 1; i <= 8; i++) {
+            for(int j = 1; j <= 8; j++) {
+                ChessPosition position = new ChessPosition(i, j);
+                ChessPiece piece = board.getPiece(position);
+                Collection<ChessMove> movesHere = piece.pieceMoves(board, position);
+                for(ChessMove move: movesHere) {
+                    movesToReturn.add(move);
+                }
+            }
+        }
+        return movesToReturn;
     }
 
     /**
