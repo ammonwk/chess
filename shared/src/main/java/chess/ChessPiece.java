@@ -9,7 +9,7 @@ import java.util.Objects;
  * Note: You can add to this class, but you may not alter
  * signature of the existing methods.
  */
-public class ChessPiece {
+public class ChessPiece implements Cloneable {
 
     private ChessGame.TeamColor pieceColor;
     private PieceType type;
@@ -119,5 +119,16 @@ public class ChessPiece {
     @Override
     public int hashCode() {
         return Objects.hash(pieceColor, type, movesCalculator);
+    }
+
+    @Override
+    protected ChessPiece clone() {
+        try {
+            ChessPiece clonedPiece = (ChessPiece) super.clone();
+            clonedPiece.movesCalculator = createMovesCalculator(clonedPiece.type);
+            return clonedPiece;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }
