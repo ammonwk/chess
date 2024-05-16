@@ -14,12 +14,13 @@ public class ChessPiece implements Cloneable {
     private ChessGame.TeamColor pieceColor;
     private PieceType type;
     private PieceMovesCalculator movesCalculator;
+    private boolean hasMoved;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.pieceColor = pieceColor;
         this.type = type;
         this.movesCalculator = createMovesCalculator(type);
-
+        this.hasMoved = false;
     }
 
     /**
@@ -106,6 +107,14 @@ public class ChessPiece implements Cloneable {
             returnValue = returnValue.toLowerCase();
         }
         return returnValue;
+    }
+
+    public boolean hasMoved() {
+        return hasMoved;
+    }
+
+    public void setMoved(boolean hasMoved) {
+        this.hasMoved = hasMoved;
     }
 
     @Override

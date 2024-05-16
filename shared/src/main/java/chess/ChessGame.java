@@ -43,7 +43,12 @@ public class ChessGame {
      */
     public enum TeamColor {
         WHITE,
-        BLACK
+        BLACK;
+
+        // Method to get the opposite turn
+        public TeamColor not() {
+            return this == BLACK ? WHITE : BLACK;
+        }
     }
 
     /**
@@ -60,6 +65,10 @@ public class ChessGame {
         }
         Collection<ChessMove> moves = piece.pieceMoves(board, startPosition);
         Collection<ChessMove> validMoves = new ArrayList<>();
+        // Add castling moves for the king
+        if (piece.getPieceType() == ChessPiece.PieceType.KING && !piece.hasMoved()) {
+            addCastlingMoves(validMoves, startPosition, piece);
+        }
         for(ChessMove move : moves) {
             if (board.getPiece(move.getStartPosition()) == null) {
                 continue;
@@ -115,14 +124,44 @@ public class ChessGame {
             piece = new ChessPiece(turn, move.getPromotionPiece());
         }
 
+        // Track the move
+        piece.setMoved(true);
+
+        // Handle castling
+        if (piece.getPieceType() == ChessPiece.PieceType.KING) {
+            int startRow = move.getStartPosition().getRow() + 1;
+            int startCol = move.getStartPosition().getColumn() + 1;
+            int endCol = move.getEndPosition().getColumn() + 1;
+
+            // Kingside castling
+            if (startCol == 5 && endCol == 7) {
+                ChessPosition rookStartPos = new ChessPosition(startRow, 8);
+                ChessPosition rookEndPos = new ChessPosition(startRow, 6);
+                ChessPiece rook = board.getPiece(rookStartPos);
+                if (rook != null && rook.getPieceType() == ChessPiece.PieceType.ROOK && !rook.hasMoved()) {
+                    board.addPiece(rookStartPos, null);
+                    board.addPiece(rookEndPos, rook);
+                    rook.setMoved(true);
+                }
+            }
+
+            // Queenside castling
+            if (startCol == 5 && endCol == 3) {
+                ChessPosition rookStartPos = new ChessPosition(startRow, 1);
+                ChessPosition rookEndPos = new ChessPosition(startRow, 4);
+                ChessPiece rook = board.getPiece(rookStartPos);
+                if (rook != null && rook.getPieceType() == ChessPiece.PieceType.ROOK && !rook.hasMoved()) {
+                    board.addPiece(rookStartPos, null);
+                    board.addPiece(rookEndPos, rook);
+                    rook.setMoved(true);
+                }
+            }
+        }
+
         board.addPiece(move.getStartPosition(), null);
         board.addPiece(move.getEndPosition(), piece);
 
-        if (turn == TeamColor.BLACK) {
-            turn = TeamColor.WHITE;
-        } else {
-            turn = TeamColor.BLACK;
-        }
+        turn = turn.not();
     }
 
     /**
@@ -238,5 +277,64 @@ public class ChessGame {
      */
     public ChessBoard getBoard() {
         return board;
+    }
+
+    private void addCastlingMoves(Collection<ChessMove> validMoves, ChessPosition kingPosition, ChessPiece king) {
+        if (king.getPieceType() != ChessPiece.PieceType.KING || king.hasMoved()) {
+            return;
+        }
+
+        int row = kingPosition.getRow();
+        ChessPosition leftRookPos = new ChessPosition(row + 1, 1);
+        ChessPosition rightRookPos = new ChessPosition(row + 1, 8);
+        ChessPiece leftRook = board.getPiece(leftRookPos);
+        ChessPiece rightRook = board.getPiece(rightRookPos);
+
+        if (leftRook != null && leftRook.getPieceType() == ChessPiece.PieceType.ROOK && !leftRook.hasMoved()) {
+            if (isPathClearForCastling(kingPosition, leftRookPos) && !isPathUnderAttack(kingPosition, leftRookPos)) {
+                validMoves.add(new ChessMove(kingPosition, new ChessPosition(row + 1, 3), null)); // Castling left
+            }
+        }
+
+        if (rightRook != null && rightRook.getPieceType() == ChessPiece.PieceType.ROOK && !rightRook.hasMoved()) {
+            if (isPathClearForCastling(kingPosition, rightRookPos) && !isPathUnderAttack(kingPosition, rightRookPos)) {
+                validMoves.add(new ChessMove(kingPosition, new ChessPosition(row + 1, 7), null)); // Castling right
+            }
+        }
+    }
+
+    private boolean isPathClearForCastling(ChessPosition kingPosition, ChessPosition rookPosition) {
+        int row = kingPosition.getRow() + 1;
+        int colStart = Math.min(kingPosition.getColumn(), rookPosition.getColumn()) + 2;
+        int colEnd = Math.max(kingPosition.getColumn(), rookPosition.getColumn());
+
+        for (int col = colStart; col <= colEnd; col++) {
+            if (board.getPiece(new ChessPosition(row, col)) != null) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean isPathUnderAttack(ChessPosition kingPosition, ChessPosition rookPosition) {
+        int row = kingPosition.getRow() + 1;
+        int colStart = Math.min(kingPosition.getColumn(), rookPosition.getColumn()) + 2;
+        int colEnd = Math.max(kingPosition.getColumn(), rookPosition.getColumn());
+        TeamColor tempTurn = turn;
+        if(board.getPiece(kingPosition) != null) {
+            tempTurn = board.getPiece(kingPosition).getTeamColor();
+        } // Act as if it were the king's turn
+
+        for (int col = colStart; col <= colEnd; col++) {
+            ChessPosition pos = new ChessPosition(row, col);
+            ChessGame testGame = new ChessGame();
+            testGame.setBoard(board.clone());
+            testGame.getBoard().addPiece(kingPosition, null);
+            testGame.getBoard().addPiece(pos, new ChessPiece(tempTurn, ChessPiece.PieceType.KING));
+            if (testGame.isInCheck(tempTurn)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
