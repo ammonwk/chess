@@ -103,7 +103,8 @@ public class ChessGame {
      * @throws InvalidMoveException if move is invalid
      */
     public void makeMove(ChessMove move) throws InvalidMoveException {
-        if(!validMoves(move.getStartPosition()).contains(move)) {
+        if(!validMoves(move.getStartPosition()).contains(move)
+        || board.getPiece(move.getStartPosition()).getTeamColor() != turn) {
             throw new InvalidMoveException();
         }
 
@@ -168,7 +169,13 @@ public class ChessGame {
     private boolean hasValidMoves(TeamColor teamColor) {
         for (int i = 1; i <= 8; i++) {
             for (int j = 1; j <= 8; j++) {
+                if(board.getPiece(new ChessPosition(i, j)) != null
+                        && board.getPiece(new ChessPosition(i, j)).getTeamColor() != teamColor) {
+                    return false;
+                }
                 if(validMoves(new ChessPosition(i, j)).size() > 0) {
+                    Collection<ChessMove> moves = validMoves(new ChessPosition(i, j));
+                    System.out.println(moves);
                     return true;
                 }
             }
