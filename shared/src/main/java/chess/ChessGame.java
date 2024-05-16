@@ -368,7 +368,7 @@ public class ChessGame {
         int col = pawnPosition.getColumn() + 1;
 
         // Check the left side for en passant
-        if (col > 0) {
+        if (col > 1) {
             ChessPosition leftPos = new ChessPosition(row, col - 1);
             ChessPiece leftPiece = board.getPiece(leftPos);
             if (leftPiece != null && leftPiece.getPieceType() == ChessPiece.PieceType.PAWN
