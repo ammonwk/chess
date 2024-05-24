@@ -18,12 +18,18 @@ public class LogoutHandler implements Route {
     public Object handle(Request req, Response res) {
         String authToken = req.headers("authorization");
         Gson gson = new Gson();
+
+        if (authToken == null || authToken.isEmpty()) {
+            res.status(401);
+            return gson.toJson(new ClearResult("Error: Unauthorized"));
+        }
+
         try {
             userService.logout(authToken);
             res.status(200);
             return gson.toJson(new ClearResult("Logged out successfully"));
         } catch (DataAccessException e) {
-            res.status(500);
+            res.status(401);
             return gson.toJson(new ClearResult("Error: " + e.getMessage()));
         }
     }

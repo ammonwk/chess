@@ -19,6 +19,12 @@ public class LoginHandler implements Route {
     public Object handle(Request req, Response res) {
         Gson gson = new Gson();
         LoginRequest loginRequest = gson.fromJson(req.body(), LoginRequest.class);
+
+        if (loginRequest.username() == null || loginRequest.password() == null) {
+            res.status(400);
+            return gson.toJson(new LoginResult("Error: Missing username or password", null));
+        }
+
         try {
             AuthData authData = userService.login(loginRequest.username(), loginRequest.password());
             res.status(200);

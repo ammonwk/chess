@@ -19,13 +19,24 @@ public class RegisterHandler implements Route {
     public Object handle(Request req, Response res) {
         Gson gson = new Gson();
         RegisterRequest registerRequest = gson.fromJson(req.body(), RegisterRequest.class);
+
+        if (registerRequest.username() == null || registerRequest.password() == null || registerRequest.email() == null) {
+            res.status(400);
+            return gson.toJson(new RegisterResult("Error: Missing required fields", null));
+        }
+
         try {
             AuthData authData = userService.register(new UserData(registerRequest.username(), registerRequest.password(), registerRequest.email()));
             res.status(200);
             return gson.toJson(new RegisterResult(authData.username(), authData.authToken()));
         } catch (DataAccessException e) {
-            res.status(500);
-            return gson.toJson(new RegisterResult("Error: " + e.getMessage(), null));
+            String message = e.getMessage();
+            if (message.equals("User already taken")) {
+                res.status(403);
+            } else {
+                res.status(500);
+            }
+            return gson.toJson(new RegisterResult("Error: " + message, null));
         }
     }
 }

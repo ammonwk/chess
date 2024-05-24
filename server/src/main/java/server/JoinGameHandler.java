@@ -19,13 +19,39 @@ public class JoinGameHandler implements Route {
         String authToken = req.headers("authorization");
         Gson gson = new Gson();
         JoinGameRequest joinGameRequest = gson.fromJson(req.body(), JoinGameRequest.class);
+
+        if (authToken == null || authToken.isEmpty()) {
+            res.status(401);
+            return gson.toJson(new JoinGameResult("Error: Unauthorized"));
+        }
+
+        // Check if gameID is valid
+        if (joinGameRequest.gameID() <= 0) {
+            res.status(400);
+            return gson.toJson(new JoinGameResult("Error: Invalid game ID"));
+        }
+
+        // Check if playerColor is valid
+        if (joinGameRequest.playerColor() == null ||
+                (!joinGameRequest.playerColor().equals("WHITE") && !joinGameRequest.playerColor().equals("BLACK"))) {
+            res.status(400);
+            return gson.toJson(new JoinGameResult("Error: Invalid player color"));
+        }
+
         try {
             gameService.joinGame(authToken, joinGameRequest.gameID(), joinGameRequest.playerColor());
             res.status(200);
             return gson.toJson(new JoinGameResult("Joined game successfully"));
         } catch (DataAccessException e) {
-            res.status(500);
-            return gson.toJson(new JoinGameResult("Error: " + e.getMessage()));
+            String message = e.getMessage();
+            if (message.equals("Unauthorized")) {
+                res.status(401);
+            } else if (message.equals("Game not found") || message.equals("Color already taken")) {
+                res.status(403);
+            } else {
+                res.status(500);
+            }
+            return gson.toJson(new JoinGameResult("Error: " + message));
         }
     }
 }
