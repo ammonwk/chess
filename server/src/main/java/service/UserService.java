@@ -2,10 +2,10 @@ package service;
 
 import dataaccess.*;
 import model.*;
-import java.util.*; // UUID
+import java.util.UUID;
 
 public class UserService {
-    private final DataAccess dataAccess;
+    private DataAccess dataAccess;
 
     public UserService(DataAccess dataAccess) {
         this.dataAccess = dataAccess;
