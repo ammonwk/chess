@@ -1,6 +1,8 @@
 package server;
 
-import spark.*;
+import dataaccess.*;
+import service.*;
+import spark.Spark;
 
 public class Server {
 
@@ -9,19 +11,19 @@ public class Server {
 
         Spark.staticFiles.location("web");
 
-        // Register your endpoints here
-        Spark.delete("/db", RequestHandler::handleClearDatabase);
-        Spark.post("/user", RequestHandler::handleRegister);
-        Spark.post("/session", RequestHandler::handleLogin);
-        Spark.post("/logout", RequestHandler::handleLogout);
-        Spark.get("/game", RequestHandler::handleListGames);
-        Spark.post("/game", RequestHandler::handleCreateGame);
-        Spark.put("/game", RequestHandler::handleJoinGame);
+        DataAccess dataAccess = new InMemoryDataAccess();
 
-        // Handle exceptions
+        Spark.delete("/db", new ClearHandler(dataAccess));
+        Spark.post("/user", new RegisterHandler(new UserService(dataAccess)));
+        Spark.post("/session", new LoginHandler(new UserService(dataAccess)));
+        Spark.delete("/session", new LogoutHandler(new UserService(dataAccess)));
+        Spark.get("/game", new ListGamesHandler(new GameService(dataAccess)));
+        Spark.post("/game", new CreateGameHandler(new GameService(dataAccess)));
+        Spark.put("/game", new JoinGameHandler(new GameService(dataAccess)));
+
         Spark.exception(Exception.class, (exception, request, response) -> {
             response.status(500);
-            response.body("Internal Server Error");
+            response.body("{\"message\":\"Error: " + exception.getMessage() + "\"}");
         });
 
         Spark.awaitInitialization();
