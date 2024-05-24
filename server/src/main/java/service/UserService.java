@@ -12,6 +12,9 @@ public class UserService {
     }
 
     public AuthData register(UserData user) throws DataAccessException {
+        if (user.username() == null || user.password() == null || user.email() == null) {
+            throw new DataAccessException("Invalid user data");
+        }
         if (dataAccess.getUser(user.username()) != null) {
             throw new DataAccessException("User already taken");
         }
@@ -23,6 +26,9 @@ public class UserService {
     }
 
     public AuthData login(String username, String password) throws DataAccessException {
+        if (username == null || password == null) {
+            throw new DataAccessException("Invalid credentials");
+        }
         UserData user = dataAccess.getUser(username);
         if (user == null || !user.password().equals(password)) {
             throw new DataAccessException("Unauthorized");

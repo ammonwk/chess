@@ -18,8 +18,14 @@ public class GameService {
         if (authData == null) {
             throw new DataAccessException("Unauthorized");
         }
+        if (gameName == null || gameName.trim().isEmpty()) {
+            throw new DataAccessException("Invalid game name");
+        }
         String username = authData.username();
-        int gameID = UUID.randomUUID().hashCode(); // Simple game ID generation, not recommended for production
+        int gameID = UUID.randomUUID().hashCode();
+        while (dataAccess.getGame(gameID) != null) {
+            gameID = UUID.randomUUID().hashCode();
+        }
         GameData gameData = new GameData(gameID, username, null, gameName, null);
         dataAccess.createGame(gameData);
         return gameData;
@@ -51,6 +57,9 @@ public class GameService {
         GameData gameData = dataAccess.getGame(gameID);
         if (gameData == null) {
             throw new DataAccessException("Game not found");
+        }
+        if (playerColor == null || (!playerColor.equals("WHITE") && !playerColor.equals("BLACK"))) {
+            throw new DataAccessException("Invalid player color");
         }
         if (playerColor.equals("WHITE") && gameData.whiteUsername() == null) {
             gameData = new GameData(gameData.gameID(), username, gameData.blackUsername(), gameData.gameName(), gameData.game());

@@ -2,6 +2,7 @@ package server;
 
 import com.google.gson.Gson;
 import service.*;
+import model.*;
 import spark.Request;
 import spark.Response;
 import spark.Route;

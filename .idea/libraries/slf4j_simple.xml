@@ -5,7 +5,13 @@
       <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-simple/1.7.36/slf4j-simple-1.7.36.jar!/" />
       <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36.jar!/" />
     </CLASSES>
-    <JAVADOC />
-    <SOURCES />
+    <JAVADOC>
+      <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-simple/1.7.36/slf4j-simple-1.7.36-javadoc.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-simple/1.7.36/slf4j-simple-1.7.36-sources.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/org/slf4j/slf4j-api/1.7.36/slf4j-api-1.7.36-sources.jar!/" />
+    </SOURCES>
   </library>
 </component>
