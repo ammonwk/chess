@@ -22,7 +22,7 @@ public class RegisterHandler implements Route {
 
         if (registerRequest.username() == null || registerRequest.password() == null || registerRequest.email() == null) {
             res.status(400);
-            return gson.toJson(new RegisterResult("Error: Missing required fields", null));
+            return gson.toJson(new ErrorResult("Error: Missing required fields"));
         }
 
         try {
@@ -31,12 +31,13 @@ public class RegisterHandler implements Route {
             return gson.toJson(new RegisterResult(authData.username(), authData.authToken()));
         } catch (DataAccessException e) {
             String message = e.getMessage();
-            if (message.equals("User already taken")) {
+            if (message.equals("Error: User already taken")) {
                 res.status(403);
+                return gson.toJson(new ErrorResult(message));
             } else {
                 res.status(500);
+                return gson.toJson(new ErrorResult("Error: " + message));
             }
-            return gson.toJson(new RegisterResult("Error: " + message, null));
         }
     }
 }

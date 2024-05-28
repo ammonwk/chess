@@ -16,10 +16,10 @@ public class GameService {
     public GameData createGame(String authToken, String gameName) throws DataAccessException {
         AuthData authData = dataAccess.getAuth(authToken);
         if (authData == null) {
-            throw new DataAccessException("Unauthorized");
+            throw new DataAccessException("Error: Unauthorized");
         }
         if (gameName == null || gameName.trim().isEmpty()) {
-            throw new DataAccessException("Invalid game name");
+            throw new DataAccessException("Error: Invalid game name");
         }
         String username = authData.username();
         int gameID = UUID.randomUUID().hashCode();
@@ -34,7 +34,7 @@ public class GameService {
     public ListGamesResult listGames(String authToken) throws DataAccessException {
         AuthData authData = dataAccess.getAuth(authToken);
         if (authData == null) {
-            throw new DataAccessException("Unauthorized");
+            throw new DataAccessException("Error: Unauthorized");
         }
         List<GameData> gameDataList = dataAccess.listGames();
         List<ListGamesResult.GameSummary> gameSummaries = gameDataList.stream()
@@ -51,22 +51,22 @@ public class GameService {
     public void joinGame(String authToken, int gameID, String playerColor) throws DataAccessException {
         AuthData authData = dataAccess.getAuth(authToken);
         if (authData == null) {
-            throw new DataAccessException("Unauthorized");
+            throw new DataAccessException("Error: Unauthorized");
         }
         String username = authData.username();
         GameData gameData = dataAccess.getGame(gameID);
         if (gameData == null) {
-            throw new DataAccessException("Game not found");
+            throw new DataAccessException("Error: Game not found");
         }
         if (playerColor == null || (!playerColor.equals("WHITE") && !playerColor.equals("BLACK"))) {
-            throw new DataAccessException("Invalid player color");
+            throw new DataAccessException("Error: Invalid player color");
         }
         if (playerColor.equals("WHITE") && gameData.whiteUsername() == null) {
             gameData = new GameData(gameData.gameID(), username, gameData.blackUsername(), gameData.gameName(), gameData.game());
         } else if (playerColor.equals("BLACK") && gameData.blackUsername() == null) {
             gameData = new GameData(gameData.gameID(), gameData.whiteUsername(), username, gameData.gameName(), gameData.game());
         } else {
-            throw new DataAccessException("Color already taken");
+            throw new DataAccessException("Error: Color already taken");
         }
         dataAccess.updateGame(gameData);
     }

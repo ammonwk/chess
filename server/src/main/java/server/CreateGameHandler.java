@@ -23,12 +23,12 @@ public class CreateGameHandler implements Route {
 
         if (authToken == null || authToken.isEmpty()) {
             res.status(401);
-            return gson.toJson(new ClearResult("Error: Unauthorized"));
+            return gson.toJson(new ErrorResult("Error: Unauthorized"));
         }
 
         if (createGameRequest.gameName() == null || createGameRequest.gameName().isEmpty()) {
             res.status(400);
-            return gson.toJson(new ClearResult("Error: Invalid game name"));
+            return gson.toJson(new ErrorResult("Error: Invalid game name"));
         }
 
         try {
@@ -37,7 +37,7 @@ public class CreateGameHandler implements Route {
             return gson.toJson(new CreateGameResult(gameData.gameID()));
         } catch (DataAccessException e) {
             res.status(401);
-            return gson.toJson(new ClearResult("Error: " + e.getMessage()));
+            return gson.toJson(new ErrorResult("Error: " + e.getMessage()));
         }
     }
 }

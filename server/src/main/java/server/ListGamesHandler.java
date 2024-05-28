@@ -24,7 +24,7 @@ public class ListGamesHandler implements Route {
             return gson.toJson(result);
         } catch (DataAccessException e) {
             res.status(401);
-            return gson.toJson(new ClearResult("Error: " + e.getMessage()));
+            return gson.toJson(new ErrorResult("Error: " + e.getMessage()));
         }
     }
 }

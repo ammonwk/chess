@@ -18,7 +18,7 @@ public class InMemoryDataAccess implements DataAccess {
     @Override
     public void createUser(UserData user) throws DataAccessException {
         if (users.containsKey(user.username())) {
-            throw new DataAccessException("User already exists");
+            throw new DataAccessException("Error: User already exists");
         }
         users.put(user.username(), user);
     }

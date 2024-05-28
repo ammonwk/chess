@@ -22,7 +22,7 @@ public class LoginHandler implements Route {
 
         if (loginRequest.username() == null || loginRequest.password() == null) {
             res.status(400);
-            return gson.toJson(new LoginResult("Error: Missing username or password", null));
+            return gson.toJson(new ErrorResult("Error: Missing username or password"));
         }
 
         try {
@@ -31,7 +31,7 @@ public class LoginHandler implements Route {
             return gson.toJson(new LoginResult(authData.username(), authData.authToken()));
         } catch (DataAccessException e) {
             res.status(401);
-            return gson.toJson(new LoginResult("Error: " + e.getMessage(), null));
+            return gson.toJson(new ErrorResult("Error: " + e.getMessage()));
         }
     }
 }

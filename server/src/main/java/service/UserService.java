@@ -13,10 +13,10 @@ public class UserService {
 
     public AuthData register(UserData user) throws DataAccessException {
         if (user.username() == null || user.password() == null || user.email() == null) {
-            throw new DataAccessException("Invalid user data");
+            throw new DataAccessException("Error: Invalid user data");
         }
         if (dataAccess.getUser(user.username()) != null) {
-            throw new DataAccessException("User already taken");
+            throw new DataAccessException("Error: User already taken");
         }
         dataAccess.createUser(user);
         String authToken = UUID.randomUUID().toString();
@@ -27,11 +27,11 @@ public class UserService {
 
     public AuthData login(String username, String password) throws DataAccessException {
         if (username == null || password == null) {
-            throw new DataAccessException("Invalid credentials");
+            throw new DataAccessException("Error: Invalid credentials");
         }
         UserData user = dataAccess.getUser(username);
         if (user == null || !user.password().equals(password)) {
-            throw new DataAccessException("Unauthorized");
+            throw new DataAccessException("Error: Unauthorized");
         }
         String authToken = UUID.randomUUID().toString();
         AuthData authData = new AuthData(authToken, username);

@@ -63,7 +63,7 @@ public class ChessPiece implements Cloneable {
             case PAWN:
                 return new PawnMovesCalculator();
             default:
-                throw new IllegalArgumentException("Invalid piece type: " + type);
+                throw new IllegalArgumentException("Error: Invalid piece type: " + type);
         }
     }
 
@@ -101,7 +101,7 @@ public class ChessPiece implements Cloneable {
                 returnValue = "P";
                 break;
         default:
-            throw new RuntimeException(this.type + " is not a valid piece type");
+            throw new RuntimeException("Error: " + this.type + " is not a valid piece type");
         }
         if (this.pieceColor == ChessGame.TeamColor.BLACK) {
             returnValue = returnValue.toLowerCase();
