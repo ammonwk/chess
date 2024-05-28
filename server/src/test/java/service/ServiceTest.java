@@ -20,7 +20,7 @@ class ServiceTest {
     }
 
     @Test
-    void testRegisterUser_Positive() throws DataAccessException {
+    void registerUserPositive() throws DataAccessException {
         UserData user = new UserData("testUser", "password", "test@example.com");
         AuthData auth = userService.register(user);
         assertNotNull(auth);
@@ -28,7 +28,7 @@ class ServiceTest {
     }
 
     @Test
-    void testRegisterUser_Negative() throws DataAccessException {
+    void registerUserNegative() throws DataAccessException {
         UserData user = new UserData("testUser", "password", "test@example.com");
         userService.register(user);
         DataAccessException exception = assertThrows(DataAccessException.class, () -> {
@@ -38,7 +38,25 @@ class ServiceTest {
     }
 
     @Test
-    void testLogin_Positive() throws DataAccessException {
+    void registerUserMissingFields() {
+        DataAccessException exception = assertThrows(DataAccessException.class, () -> {
+            userService.register(new UserData(null, "password", "test@example.com"));
+        });
+        assertEquals("Error: Invalid user data", exception.getMessage());
+
+        exception = assertThrows(DataAccessException.class, () -> {
+            userService.register(new UserData("testUser", null, "test@example.com"));
+        });
+        assertEquals("Error: Invalid user data", exception.getMessage());
+
+        exception = assertThrows(DataAccessException.class, () -> {
+            userService.register(new UserData("testUser", "password", null));
+        });
+        assertEquals("Error: Invalid user data", exception.getMessage());
+    }
+
+    @Test
+    void loginPositive() throws DataAccessException {
         UserData user = new UserData("testUser", "password", "test@example.com");
         userService.register(user);
         AuthData auth = userService.login("testUser", "password");
@@ -47,7 +65,7 @@ class ServiceTest {
     }
 
     @Test
-    void testLogin_Negative() throws DataAccessException {
+    void loginNegative() throws DataAccessException {
         UserData user = new UserData("testUser", "password", "test@example.com");
         userService.register(user);
         DataAccessException exception = assertThrows(DataAccessException.class, () -> {
@@ -57,14 +75,14 @@ class ServiceTest {
     }
 
     @Test
-    void testLogout_Positive() throws DataAccessException {
+    void logoutPositive() throws DataAccessException {
         UserData user = new UserData("testUser", "password", "test@example.com");
         AuthData auth = userService.register(user);
         userService.logout(auth.authToken());
     }
 
     @Test
-    void testLogout_Negative() {
+    void logoutNegative() {
         DataAccessException exception = assertThrows(DataAccessException.class, () -> {
             userService.logout("invalidToken");
         });
@@ -72,7 +90,7 @@ class ServiceTest {
     }
 
     @Test
-    void testCreateGame_Positive() throws DataAccessException {
+    void createGamePositive() throws DataAccessException {
         UserData user = new UserData("testUser", "password", "test@example.com");
         AuthData auth = userService.register(user);
         GameData game = gameService.createGame(auth.authToken(), "testGame");
@@ -81,7 +99,7 @@ class ServiceTest {
     }
 
     @Test
-    void testCreateGame_Negative() {
+    void createGameNegative() {
         DataAccessException exception = assertThrows(DataAccessException.class, () -> {
             gameService.createGame("invalidToken", "testGame");
         });
@@ -89,7 +107,23 @@ class ServiceTest {
     }
 
     @Test
-    void testListGames_Positive() throws DataAccessException {
+    void createGameEmptyGameName() throws DataAccessException {
+        UserData user = new UserData("testUser", "password", "test@example.com");
+        AuthData auth = userService.register(user);
+
+        DataAccessException exception = assertThrows(DataAccessException.class, () -> {
+            gameService.createGame(auth.authToken(), "");
+        });
+        assertEquals("Error: Invalid game name", exception.getMessage());
+
+        exception = assertThrows(DataAccessException.class, () -> {
+            gameService.createGame(auth.authToken(), "   ");
+        });
+        assertEquals("Error: Invalid game name", exception.getMessage());
+    }
+
+    @Test
+    void listGamesPositive() throws DataAccessException {
         UserData user = new UserData("testUser", "password", "test@example.com");
         AuthData auth = userService.register(user);
         gameService.createGame(auth.authToken(), "testGame1");
@@ -101,7 +135,7 @@ class ServiceTest {
     }
 
     @Test
-    void testListGames_Negative() {
+    void listGamesNegative() {
         DataAccessException exception = assertThrows(DataAccessException.class, () -> {
             gameService.listGames("invalidToken");
         });
@@ -109,7 +143,7 @@ class ServiceTest {
     }
 
     @Test
-    void testJoinGame_Positive() throws DataAccessException {
+    void joinGamePositive() throws DataAccessException {
         UserData user = new UserData("testUser", "password", "test@example.com");
         AuthData auth = userService.register(user);
         GameData game = gameService.createGame(auth.authToken(), "testGame");
@@ -120,7 +154,7 @@ class ServiceTest {
     }
 
     @Test
-    void testJoinGame_Negative() throws DataAccessException {
+    void joinGameInvalidColor() throws DataAccessException {
         UserData user = new UserData("testUser", "password", "test@example.com");
         AuthData auth = userService.register(user);
         GameData game = gameService.createGame(auth.authToken(), "testGame");
@@ -129,5 +163,21 @@ class ServiceTest {
             gameService.joinGame(auth.authToken(), game.gameID(), "BLUE");
         });
         assertEquals("Error: Invalid player color", exception.getMessage());
+    }
+
+    @Test
+    void joinGameAlreadyTakenColor() throws DataAccessException {
+        UserData user1 = new UserData("testUser1", "password", "test1@example.com");
+        AuthData auth1 = userService.register(user1);
+        GameData game = gameService.createGame(auth1.authToken(), "testGame");
+        gameService.joinGame(auth1.authToken(), game.gameID(), "WHITE");
+
+        UserData user2 = new UserData("testUser2", "password", "test2@example.com");
+        AuthData auth2 = userService.register(user2);
+
+        DataAccessException exception = assertThrows(DataAccessException.class, () -> {
+            gameService.joinGame(auth2.authToken(), game.gameID(), "WHITE");
+        });
+        assertEquals("Error: Color already taken", exception.getMessage());
     }
 }
