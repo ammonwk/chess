@@ -23,7 +23,7 @@ public class ClearHandler implements Route {
             return gson.toJson(new ClearResult("Database cleared successfully"));
         } catch (DataAccessException e) {
             res.status(500);
-            return gson.toJson(new ErrorResult("Error: " + e.getMessage()));
+            return gson.toJson(new ErrorResult(e.getMessage()));
         }
     }
 }

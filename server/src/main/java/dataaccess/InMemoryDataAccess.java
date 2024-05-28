@@ -16,7 +16,7 @@ public class InMemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public void createUser(UserData user) throws DataAccessException {
+    public synchronized void createUser(UserData user) throws DataAccessException {
         if (users.containsKey(user.username())) {
             throw new DataAccessException("Error: User already exists");
         }
@@ -24,7 +24,7 @@ public class InMemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public UserData getUser(String username) throws DataAccessException {
+    public synchronized UserData getUser(String username) throws DataAccessException {
         return users.get(username);
     }
 
@@ -44,12 +44,12 @@ public class InMemoryDataAccess implements DataAccess {
     }
 
     @Override
-    public void createGame(GameData game) throws DataAccessException {
+    public synchronized void createGame(GameData game) throws DataAccessException {
         games.put(game.gameID(), game);
     }
 
     @Override
-    public GameData getGame(int gameID) throws DataAccessException {
+    public synchronized GameData getGame(int gameID) throws DataAccessException {
         return games.get(gameID);
     }
 

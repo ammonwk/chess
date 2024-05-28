@@ -26,7 +26,7 @@ public class GameService {
         while (dataAccess.getGame(gameID) != null) {
             gameID = UUID.randomUUID().hashCode();
         }
-        GameData gameData = new GameData(gameID, username, null, gameName, null);
+        GameData gameData = new GameData(gameID, null, null, gameName, null);
         dataAccess.createGame(gameData);
         return gameData;
     }
