@@ -22,7 +22,7 @@ public class GameService {
             throw new DataAccessException("Error: Invalid game name");
         }
         String username = authData.username();
-        int gameID = UUID.randomUUID().hashCode();
+        int gameID = Math.abs(UUID.randomUUID().hashCode());
         while (dataAccess.getGame(gameID) != null) {
             gameID = UUID.randomUUID().hashCode();
         }

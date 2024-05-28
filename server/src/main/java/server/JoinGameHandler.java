@@ -26,7 +26,7 @@ public class JoinGameHandler implements Route {
         }
 
         // Check if gameID is valid
-        if (joinGameRequest.gameID() == 0) {
+        if (joinGameRequest.gameID() <= 0) {
             res.status(400);
             return gson.toJson(new ErrorResult("Error: Invalid game ID"));
         }
