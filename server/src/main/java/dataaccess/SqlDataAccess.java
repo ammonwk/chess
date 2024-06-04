@@ -6,6 +6,7 @@ import java.sql.*;
 import static java.sql.Statement.RETURN_GENERATED_KEYS;
 import static java.sql.Types.NULL;
 
+import chess.ChessGame;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
@@ -77,18 +78,55 @@ public class SqlDataAccess implements DataAccess{
         }
     }
 
+    private int executeUpdate(String statement, Object... params) throws DataAccessException {
+        try (var conn = DatabaseManager.getConnection()) {
+            try (var ps = conn.prepareStatement(statement, RETURN_GENERATED_KEYS)) {
+                for (var i = 0; i < params.length; i++) {
+                    var param = params[i];
+                    if (param instanceof String p) ps.setString(i + 1, p);
+                    else if (param instanceof Integer p) ps.setInt(i + 1, p);
+                    else if (param instanceof ChessGame p) ps.setString(i + 1, p.toString());
+                    else if (param == null) ps.setNull(i + 1, NULL);
+                }
+                ps.executeUpdate();
+
+                var rs = ps.getGeneratedKeys();
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+
+                return 0;
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException(String.format("unable to update database: %s, %s", statement, e.getMessage()));
+        }
+    }
+
     @Override
-    public void clear() {
-        users.clear();
-        auths.clear();
-        games.clear();
+    public void clear() throws DataAccessException {
+        executeUpdate("TRUNCATE users");
+        executeUpdate("TRUNCATE auth");
+        executeUpdate("TRUNCATE games");
     }
 
     @Override
     public synchronized void createUser(UserData user) throws DataAccessException {
-        if (users.containsKey(user.username())) {
-            throw new DataAccessException("Error: User already exists");
+        try (var conn = DatabaseManager.getConnection()) {
+            try (PreparedStatement statement = conn.prepareStatement("SELECT COUNT(* FROM users WHERE username = ?");) {
+                statement.setString(1, user.username());
+                try (ResultSet rs = statement.executeQuery()) {
+                    boolean exists = rs.next() && rs.getInt(1) > 0;
+                    if(rs.next() && rs.getInt(1) > 0) {
+                        throw new DataAccessException("Error: User already exists");
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
         }
+        var statement = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
+        var json = new Gson().toJson(user);
+        var id = executeUpdate(statement, json);
         users.put(user.username(), user);
     }
 
