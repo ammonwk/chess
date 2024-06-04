@@ -3,6 +3,7 @@ package service;
 import dataaccess.*;
 import model.*;
 import java.util.UUID;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class UserService {
     private DataAccess dataAccess;
@@ -18,6 +19,8 @@ public class UserService {
         if (dataAccess.getUser(user.username()) != null) {
             throw new DataAccessException("Error: User already taken");
         }
+        // Encrypt password
+        user = new UserData(user.username(), BCrypt.hashpw(user.password(), BCrypt.gensalt()), user.email());
         dataAccess.createUser(user);
         String authToken = UUID.randomUUID().toString();
         AuthData authData = new AuthData(authToken, user.username());
@@ -30,7 +33,7 @@ public class UserService {
             throw new DataAccessException("Error: Invalid credentials");
         }
         UserData user = dataAccess.getUser(username);
-        if (user == null || !user.password().equals(password)) {
+        if (user == null || !BCrypt.checkpw(password, user.password())) {
             throw new DataAccessException("Error: Unauthorized");
         }
         String authToken = UUID.randomUUID().toString();

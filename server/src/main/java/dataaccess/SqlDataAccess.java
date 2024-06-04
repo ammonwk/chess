@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 
 public class SqlDataAccess implements DataAccess{
-    private final Map<String, UserData> users = new HashMap<>();
     private final Map<String, AuthData> auths = new HashMap<>();
     private final Map<Integer, GameData> games = new HashMap<>();
 
@@ -109,10 +108,7 @@ public class SqlDataAccess implements DataAccess{
 
     @Override
     public synchronized void createUser(UserData user) throws DataAccessException {
-//        if (getUser(user.username()) != null) { // This is checked in UserService
-//            throw new DataAccessException("Error: User already exists");
-//        }
-        var statement = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
+        var statement = "INSERT INTO users (username, email, hashedPassword) VALUES (?, ?, ?)";
         var json = new Gson().toJson(user);
         var id = executeUpdate(statement, user.username(), user.email(), user.password());
     }
