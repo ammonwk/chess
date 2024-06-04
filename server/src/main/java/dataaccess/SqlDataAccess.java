@@ -109,8 +109,7 @@ public class SqlDataAccess implements DataAccess{
     @Override
     public synchronized void createUser(UserData user) throws DataAccessException {
         var statement = "INSERT INTO users (username, email, hashedPassword) VALUES (?, ?, ?)";
-        var json = new Gson().toJson(user);
-        var id = executeUpdate(statement, user.username(), user.email(), user.password());
+        executeUpdate(statement, user.username(), user.email(), user.password());
     }
 
     @Override
@@ -132,12 +131,25 @@ public class SqlDataAccess implements DataAccess{
 
     @Override
     public void createAuth(AuthData auth) throws DataAccessException {
-        auths.put(auth.authToken(), auth);
+        var statement = "INSERT INTO users (username, authToken) VALUES (?, ?)";
+        executeUpdate(statement, auth.username(), auth.authToken());
     }
 
     @Override
     public AuthData getAuth(String authToken) throws DataAccessException {
-        return auths.get(authToken);
+        try (var conn = DatabaseManager.getConnection()) {
+            try (PreparedStatement statement = conn.prepareStatement("SELECT username, authToken FROM auths WHERE authToken = ?");) {
+                statement.setString(1, authToken);
+                try (ResultSet rs = statement.executeQuery()) {
+                    if(rs.next()) {
+                        return new AuthData(rs.getString(1), rs.getString(2));
+                    }
+                }
+            }
+        } catch (Exception e) {
+            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
+        }
+        return null;
     }
 
     @Override
