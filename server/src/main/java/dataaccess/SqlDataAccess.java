@@ -109,28 +109,29 @@ public class SqlDataAccess implements DataAccess{
 
     @Override
     public synchronized void createUser(UserData user) throws DataAccessException {
+//        if (getUser(user.username()) != null) { // This is checked in UserService
+//            throw new DataAccessException("Error: User already exists");
+//        }
+        var statement = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
+        var json = new Gson().toJson(user);
+        var id = executeUpdate(statement, user.username(), user.email(), user.password());
+    }
+
+    @Override
+    public synchronized UserData getUser(String username) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            try (PreparedStatement statement = conn.prepareStatement("SELECT COUNT(* FROM users WHERE username = ?");) {
-                statement.setString(1, user.username());
+            try (PreparedStatement statement = conn.prepareStatement("SELECT username, email FROM users WHERE username = ?");) {
+                statement.setString(1, username);
                 try (ResultSet rs = statement.executeQuery()) {
-                    boolean exists = rs.next() && rs.getInt(1) > 0;
-                    if(rs.next() && rs.getInt(1) > 0) {
-                        throw new DataAccessException("Error: User already exists");
+                    if(rs.next()) {
+                        return new UserData(rs.getString(1), "", rs.getString(3));
                     }
                 }
             }
         } catch (Exception e) {
             throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
         }
-        var statement = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
-        var json = new Gson().toJson(user);
-        var id = executeUpdate(statement, json);
-        users.put(user.username(), user);
-    }
-
-    @Override
-    public synchronized UserData getUser(String username) throws DataAccessException {
-        return users.get(username);
+        return null;
     }
 
     @Override

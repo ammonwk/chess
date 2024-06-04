@@ -11,19 +11,6 @@ public class Server {
 
         Spark.staticFiles.location("web");
         DataAccess dataAccess;
-
-//        try {
-//            var port = 0;
-//
-//            var service = new PetService(new MySqlDataAccess());
-//            var server = new PetServer(service).run(port);
-//            port = server.port();
-//            System.out.printf("Server started on port %d%n", port);
-//            return;
-//        } catch (Throwable ex) {
-//            System.out.printf("Unable to start server: %s%n", ex.getMessage());
-//        }
-
         try {
             dataAccess = new SqlDataAccess();
         } catch (DataAccessException e) {
