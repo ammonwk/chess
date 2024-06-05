@@ -12,7 +12,6 @@ import model.GameData;
 import model.UserData;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,15 +23,13 @@ public class SqlDataAccess implements DataAccess{
         configureDatabase();
     }
 
-    private final String[] createStatements = { "DROP TABLE IF EXISTS users;",
-    "DROP TABLE IF EXISTS auths;",
-    "DROP TABLE IF EXISTS games;",
+    private final String[] createStatements = {
     """
     CREATE TABLE IF NOT EXISTS users (
       `id` int NOT NULL AUTO_INCREMENT,
       `username` varchar(256) NOT NULL,
       `email` varchar(256) NOT NULL,
-      `password` varchar(256) NOT NULL,
+      `hashedPassword` varchar(256) NOT NULL,
       PRIMARY KEY (`id`),
       INDEX(email),
       INDEX(username)
@@ -42,7 +39,7 @@ public class SqlDataAccess implements DataAccess{
     CREATE TABLE IF NOT EXISTS auths (
       `id` int NOT NULL AUTO_INCREMENT,
       `username` varchar(256) NOT NULL,
-      `authtoken` varchar(256) NOT NULL,
+      `authToken` varchar(256) NOT NULL,
       PRIMARY KEY (`id`),
       INDEX(username)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -51,7 +48,7 @@ public class SqlDataAccess implements DataAccess{
     CREATE TABLE IF NOT EXISTS games (
       `id` int NOT NULL AUTO_INCREMENT,
       `gameId` varchar(256) NOT NULL,
-      `game` TEXT DEFAULT NULL
+      `game` TEXT DEFAULT NULL,
       PRIMARY KEY (`id`),
       INDEX(gameId)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -98,7 +95,7 @@ public class SqlDataAccess implements DataAccess{
     @Override
     public void clear() throws DataAccessException {
         executeUpdate("TRUNCATE users");
-        executeUpdate("TRUNCATE auth");
+        executeUpdate("TRUNCATE auths");
         executeUpdate("TRUNCATE games");
     }
 
@@ -111,11 +108,11 @@ public class SqlDataAccess implements DataAccess{
     @Override
     public synchronized UserData getUser(String username) throws DataAccessException {
         try (var conn = DatabaseManager.getConnection()) {
-            try (PreparedStatement statement = conn.prepareStatement("SELECT username, email FROM users WHERE username = ?");) {
+            try (PreparedStatement statement = conn.prepareStatement("SELECT username, hashedPassword, email FROM users WHERE username = ?");) {
                 statement.setString(1, username);
                 try (ResultSet rs = statement.executeQuery()) {
                     if(rs.next()) {
-                        return new UserData(rs.getString(1), "", rs.getString(3));
+                        return new UserData(rs.getString(1), rs.getString(2), rs.getString(3));
                     }
                 }
             }
@@ -127,8 +124,9 @@ public class SqlDataAccess implements DataAccess{
 
     @Override
     public void createAuth(AuthData auth) throws DataAccessException {
-        var statement = "INSERT INTO users (username, authToken) VALUES (?, ?)";
+        var statement = "INSERT INTO auths (username, authToken) VALUES (?, ?)";
         executeUpdate(statement, auth.username(), auth.authToken());
+        System.out.println("Created auth: " + auth.username() + " with token: " + auth.authToken());
     }
 
     @Override
@@ -138,7 +136,8 @@ public class SqlDataAccess implements DataAccess{
                 statement.setString(1, authToken);
                 try (ResultSet rs = statement.executeQuery()) {
                     if(rs.next()) {
-                        return new AuthData(rs.getString(1), rs.getString(2));
+                        System.out.println("Retrieved auth for token: " + authToken + ", username: " + rs.getString(1));
+                        return new AuthData(rs.getString(2), rs.getString(1));
                     }
                 }
             }
@@ -150,21 +149,13 @@ public class SqlDataAccess implements DataAccess{
 
     @Override
     public void deleteAuth(String authToken) throws DataAccessException {
-        try (var conn = DatabaseManager.getConnection()) {
-            try (PreparedStatement statement = conn.prepareStatement("DELETE FROM auths WHERE authToken = ?");) {
-                statement.setString(1, authToken);
-                try (ResultSet rs = statement.executeQuery()) {
-                    rs.next();
-                }
-            }
-        } catch (Exception e) {
-            throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
-        }
+        var statement = "DELETE FROM auths WHERE authToken = ?";
+        executeUpdate(statement, authToken);
     }
 
     @Override
     public synchronized void createGame(GameData game) throws DataAccessException {
-        var statement = "INSERT INTO users (gameId, game) VALUES (?, ?)";
+        var statement = "INSERT INTO games (gameId, game) VALUES (?, ?)";
         var json = new Gson().toJson(game);
         executeUpdate(statement, game.gameID(), json);
     }
