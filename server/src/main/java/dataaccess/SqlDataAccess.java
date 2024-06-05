@@ -179,20 +179,20 @@ public class SqlDataAccess implements DataAccess{
 
     @Override
     public List<GameData> listGames() throws DataAccessException {
-        ArrayList<GameData> games_to_return = new ArrayList<>();
+        ArrayList<GameData> gamesToReturn = new ArrayList<>();
         try (var conn = DatabaseManager.getConnection()) {
             try (PreparedStatement statement = conn.prepareStatement("SELECT game FROM games");) {
                 try (ResultSet rs = statement.executeQuery()) {
                     while(rs.next()) {
                         GameData game = new Gson().fromJson(rs.getString("game"), GameData.class);
-                        games_to_return.add(game);
+                        gamesToReturn.add(game);
                     }
                 }
             }
         } catch (Exception e) {
             throw new DataAccessException(String.format("Unable to read data: %s", e.getMessage()));
         }
-        return games_to_return;
+        return gamesToReturn;
     }
 
     @Override
