@@ -125,4 +125,20 @@ public class ChessBoard implements Cloneable {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public String toString() {
+        String toReturn = "|";
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                if (pieces[j][i] != null) {
+                    toReturn = toReturn + pieces[j][i].toString() + "|";
+                } else {
+                    toReturn = toReturn + " |";
+                }
+            }
+            toReturn = toReturn + "\n-----------------\n|";
+        }
+        return toReturn;
+    }
 }

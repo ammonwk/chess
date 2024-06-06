@@ -13,13 +13,11 @@ public class ChessPiece implements Cloneable {
 
     private ChessGame.TeamColor pieceColor;
     private PieceType type;
-    private PieceMovesCalculator movesCalculator;
     private boolean hasMoved;
 
     public ChessPiece(ChessGame.TeamColor pieceColor, ChessPiece.PieceType type) {
         this.pieceColor = pieceColor;
         this.type = type;
-        this.movesCalculator = createMovesCalculator(type);
         this.hasMoved = false;
     }
 
@@ -75,7 +73,7 @@ public class ChessPiece implements Cloneable {
      * @return Collection of valid moves
      */
     public Collection<ChessMove> pieceMoves(ChessBoard board, ChessPosition myPosition) {
-        return movesCalculator.calculateMoves(board, myPosition);
+        return createMovesCalculator(type).calculateMoves(board, myPosition);
     }
 
     @Override
@@ -127,14 +125,13 @@ public class ChessPiece implements Cloneable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(pieceColor, type, movesCalculator);
+        return Objects.hash(pieceColor, type);
     }
 
     @Override
     protected ChessPiece clone() {
         try {
             ChessPiece clonedPiece = (ChessPiece) super.clone();
-            clonedPiece.movesCalculator = createMovesCalculator(clonedPiece.type);
             return clonedPiece;
         } catch (CloneNotSupportedException e) {
             throw new AssertionError();

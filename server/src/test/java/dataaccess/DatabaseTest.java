@@ -8,6 +8,9 @@ import model.AuthData;
 import model.GameData;
 import model.UserData;
 import spark.utils.Assert;
+import chess.*;
+
+import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,6 +23,7 @@ class DatabaseTest {
     public void setUp() {
         try {
             dataAccess = new SqlDataAccess();
+            dataAccess.clear();
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
@@ -31,7 +35,7 @@ class DatabaseTest {
     }
 
     @Test
-    void createUserPositive() throws DataAccessException {
+    void createUserWorks() throws DataAccessException {
         UserData user = new UserData("test", "test", "test");
         dataAccess.createUser(user);
     }
@@ -40,168 +44,115 @@ class DatabaseTest {
     void createUserDuplicate() throws DataAccessException {
         UserData user = new UserData("test", "test", "test");
         dataAccess.createUser(user);
-        Assertions.assertThrows(DataAccessException.class, () -> {dataAccess.createUser(user);});
-    }
-
-    @Test
-    void registerUserPositive() throws DataAccessException {
-        UserData user = new UserData("testUser", "password", "test@example.com");
-        AuthData auth = userService.register(user);
-        assertNotNull(auth);
-        assertEquals("testUser", auth.username());
-    }
-
-    @Test
-    void registerUserNegative() throws DataAccessException {
-        UserData user = new UserData("testUser", "password", "test@example.com");
-        userService.register(user);
-        DataAccessException exception = assertThrows(DataAccessException.class, () -> {
-            userService.register(user);
+        Assertions.assertThrows(DataAccessException.class, () -> {
+            dataAccess.createUser(user);
         });
-        assertEquals("Error: User already taken", exception.getMessage());
     }
 
     @Test
-    void registerUserMissingFields() {
-        DataAccessException exception = assertThrows(DataAccessException.class, () -> {
-            userService.register(new UserData(null, "password", "test@example.com"));
-        });
-        assertEquals("Error: Invalid user data", exception.getMessage());
-
-        exception = assertThrows(DataAccessException.class, () -> {
-            userService.register(new UserData("testUser", null, "test@example.com"));
-        });
-        assertEquals("Error: Invalid user data", exception.getMessage());
-
-        exception = assertThrows(DataAccessException.class, () -> {
-            userService.register(new UserData("testUser", "password", null));
-        });
-        assertEquals("Error: Invalid user data", exception.getMessage());
+    void getUserWorks() throws DataAccessException {
+        UserData user = new UserData("test", "test", "test");
+        dataAccess.createUser(user);
+        Assertions.assertEquals(user, dataAccess.getUser(user.username()));
     }
 
     @Test
-    void loginPositive() throws DataAccessException {
-        UserData user = new UserData("testUser", "password", "test@example.com");
-        userService.register(user);
-        AuthData auth = userService.login("testUser", "password");
-        assertNotNull(auth);
-        assertEquals("testUser", auth.username());
+    void getUserNotFound() throws DataAccessException {
+        Assertions.assertEquals(dataAccess.getUser("nobody"), null);
     }
 
     @Test
-    void loginNegative() throws DataAccessException {
-        UserData user = new UserData("testUser", "password", "test@example.com");
-        userService.register(user);
-        DataAccessException exception = assertThrows(DataAccessException.class, () -> {
-            userService.login("testUser", "wrongPassword");
-        });
-        assertEquals("Error: Unauthorized", exception.getMessage());
+    void createAuthWorks() throws DataAccessException {
+        AuthData auth = new AuthData("test", "test");
+        dataAccess.createAuth(auth);
     }
 
     @Test
-    void logoutPositive() throws DataAccessException {
-        UserData user = new UserData("testUser", "password", "test@example.com");
-        AuthData auth = userService.register(user);
-        userService.logout(auth.authToken());
+    void createAuthOverride() throws DataAccessException {
+        AuthData auth = new AuthData("test", "test");
+        dataAccess.createAuth(auth);
+        dataAccess.createAuth(auth);
     }
 
     @Test
-    void logoutNegative() {
-        DataAccessException exception = assertThrows(DataAccessException.class, () -> {
-            userService.logout("invalidToken");
-        });
-        assertEquals("Error: Unauthorized", exception.getMessage());
+    void getAuthWorks() throws DataAccessException {
+        AuthData auth = new AuthData("test", "test");
+        dataAccess.createAuth(auth);
+        Assertions.assertEquals("test", dataAccess.getAuth("test").authToken());
     }
 
     @Test
-    void createGamePositive() throws DataAccessException {
-        UserData user = new UserData("testUser", "password", "test@example.com");
-        AuthData auth = userService.register(user);
-        GameData game = gameService.createGame(auth.authToken(), "testGame");
-        assertNotNull(game);
-        assertEquals("testGame", game.gameName());
+    void getAuthNone() throws DataAccessException {
+        Assertions.assertEquals(null, dataAccess.getAuth("test"));
     }
 
     @Test
-    void createGameNegative() {
-        DataAccessException exception = assertThrows(DataAccessException.class, () -> {
-            gameService.createGame("invalidToken", "testGame");
-        });
-        assertEquals("Error: Unauthorized", exception.getMessage());
+    void deleteAuthWorks() throws DataAccessException {
+        AuthData auth = new AuthData("test", "test");
+        dataAccess.createAuth(auth);
+        Assertions.assertEquals("test", dataAccess.getAuth("test").authToken());
+        dataAccess.deleteAuth("test");
+        Assertions.assertEquals(null, dataAccess.getAuth("test"));
     }
 
     @Test
-    void createGameEmptyGameName() throws DataAccessException {
-        UserData user = new UserData("testUser", "password", "test@example.com");
-        AuthData auth = userService.register(user);
-
-        DataAccessException exception = assertThrows(DataAccessException.class, () -> {
-            gameService.createGame(auth.authToken(), "");
-        });
-        assertEquals("Error: Invalid game name", exception.getMessage());
-
-        exception = assertThrows(DataAccessException.class, () -> {
-            gameService.createGame(auth.authToken(), "   ");
-        });
-        assertEquals("Error: Invalid game name", exception.getMessage());
+    void deleteAuthNothing() throws DataAccessException {
+        dataAccess.deleteAuth("a token that doesn't exist");
     }
 
     @Test
-    void listGamesPositive() throws DataAccessException {
-        UserData user = new UserData("testUser", "password", "test@example.com");
-        AuthData auth = userService.register(user);
-        gameService.createGame(auth.authToken(), "testGame1");
-        gameService.createGame(auth.authToken(), "testGame2");
-
-        ListGamesResult result = gameService.listGames(auth.authToken());
-        assertNotNull(result);
-        assertEquals(2, result.games().size());
+    void createGameWorks() throws DataAccessException {
+        ChessGame game = new ChessGame();
+        GameData data = new GameData(1, "white", "black", "test", game);
+        dataAccess.createGame(data);
     }
 
     @Test
-    void listGamesNegative() {
-        DataAccessException exception = assertThrows(DataAccessException.class, () -> {
-            gameService.listGames("invalidToken");
-        });
-        assertEquals("Error: Unauthorized", exception.getMessage());
+    void createGameNull() throws DataAccessException {
+        GameData data = new GameData(1, null, null, null, null);
+        dataAccess.createGame(data);
     }
 
     @Test
-    void joinGamePositive() throws DataAccessException {
-        UserData user = new UserData("testUser", "password", "test@example.com");
-        AuthData auth = userService.register(user);
-        GameData game = gameService.createGame(auth.authToken(), "testGame");
-        gameService.joinGame(auth.authToken(), game.gameID(), "WHITE");
-
-        GameData updatedGame = dataAccess.getGame(game.gameID());
-        assertEquals("testUser", updatedGame.whiteUsername());
+    void getGameWorks() throws DataAccessException {
+        ChessGame game = new ChessGame();
+        GameData data = new GameData(1, "white", "black", "test", game);
+        dataAccess.createGame(data);
+        Assertions.assertTrue(data.game().getBoard().equals(dataAccess.getGame(1).game().getBoard()));
     }
 
     @Test
-    void joinGameInvalidColor() throws DataAccessException {
-        UserData user = new UserData("testUser", "password", "test@example.com");
-        AuthData auth = userService.register(user);
-        GameData game = gameService.createGame(auth.authToken(), "testGame");
-
-        DataAccessException exception = assertThrows(DataAccessException.class, () -> {
-            gameService.joinGame(auth.authToken(), game.gameID(), "BLUE");
-        });
-        assertEquals("Error: Invalid player color", exception.getMessage());
+    void getGameNone() throws DataAccessException {
+        Assertions.assertEquals(null, dataAccess.getGame(1));
     }
 
     @Test
-    void joinGameAlreadyTakenColor() throws DataAccessException {
-        UserData user1 = new UserData("testUser1", "password", "test1@example.com");
-        AuthData auth1 = userService.register(user1);
-        GameData game = gameService.createGame(auth1.authToken(), "testGame");
-        gameService.joinGame(auth1.authToken(), game.gameID(), "WHITE");
+    void listGamesWorks() throws DataAccessException {
+        dataAccess.createGame(new GameData(1, "white", "black", "test", new ChessGame()));
+        Assertions.assertEquals(1, dataAccess.listGames().size());
+    }
 
-        UserData user2 = new UserData("testUser2", "password", "test2@example.com");
-        AuthData auth2 = userService.register(user2);
+    @Test
+    void listGamesNone() throws DataAccessException {
+        Assertions.assertEquals(new ArrayList<>(), dataAccess.listGames());
+    }
 
-        DataAccessException exception = assertThrows(DataAccessException.class, () -> {
-            gameService.joinGame(auth2.authToken(), game.gameID(), "WHITE");
-        });
-        assertEquals("Error: Color already taken", exception.getMessage());
+    @Test
+    void updateGameWorks() throws DataAccessException, InvalidMoveException {
+        ChessGame game = new ChessGame();
+        GameData data = new GameData(1, "white", "black", "test", game);
+        dataAccess.createGame(data);
+        Assertions.assertTrue(data.game().getBoard().equals(dataAccess.getGame(1).game().getBoard()));
+        game.makeMove(new ChessMove(new ChessPosition(2,1), new ChessPosition(4,1), null));
+        dataAccess.updateGame(data);
+        Assertions.assertTrue(data.game().getBoard().equals(dataAccess.getGame(1).game().getBoard()));
+    }
+
+    @Test
+    void updateGameNeverAdded() throws DataAccessException, InvalidMoveException {
+        ChessGame game = new ChessGame();
+        GameData data = new GameData(1, "white", "black", "test", game);
+        dataAccess.updateGame(data);
+        Assertions.assertEquals(null, dataAccess.getGame(1));
     }
 }

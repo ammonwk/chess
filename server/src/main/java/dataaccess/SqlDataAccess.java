@@ -101,6 +101,9 @@ public class SqlDataAccess implements DataAccess{
 
     @Override
     public synchronized void createUser(UserData user) throws DataAccessException {
+        if(getUser(user.username()) != null) {
+            throw new DataAccessException("Error: The username " + user.username() + " is taken.");
+        }
         var statement = "INSERT INTO users (username, email, hashedPassword) VALUES (?, ?, ?)";
         executeUpdate(statement, user.username(), user.email(), user.password());
     }
@@ -156,6 +159,7 @@ public class SqlDataAccess implements DataAccess{
     @Override
     public synchronized void createGame(GameData game) throws DataAccessException {
         var statement = "INSERT INTO games (gameId, game) VALUES (?, ?)";
+
         var json = new Gson().toJson(game);
         executeUpdate(statement, game.gameID(), json);
     }
