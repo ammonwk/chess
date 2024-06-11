@@ -29,5 +29,6 @@ public class Main {
             scanner.next(); // clear the invalid input
         }
         }
+        scanner.close();
     }
 }
