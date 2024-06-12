@@ -58,6 +58,12 @@ public class ServerFacade {
             if (request instanceof String authToken) {
                 http.setRequestProperty("Authorization", authToken);
             } else {
+                if (request instanceof CreateGameRequest createGameRequest) {
+                    http.setRequestProperty("Authorization", createGameRequest.authToken());
+                }
+                if (request instanceof JoinGameRequest joinGameRequest) {
+                    http.setRequestProperty("Authorization", joinGameRequest.authToken());
+                }
                 writeBody(request, http);
             }
 

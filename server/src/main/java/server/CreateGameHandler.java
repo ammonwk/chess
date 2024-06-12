@@ -20,9 +20,9 @@ public class CreateGameHandler implements Route {
 
     @Override
     public Object handle(Request req, Response res) {
+        String authToken = req.headers("authorization");
         Gson gson = new Gson();
         CreateGameRequest createGameRequest = gson.fromJson(req.body(), CreateGameRequest.class);
-        String authToken = createGameRequest.authToken();
 
         if (authToken == null || authToken.isEmpty()) {
             res.status(401);
