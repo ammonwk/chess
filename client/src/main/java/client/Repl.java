@@ -2,7 +2,6 @@ package client;
 
 import chess.ChessGame;
 import dataaccess.DataAccessException;
-import service.CreateGameResult;
 import service.ListGamesResult;
 
 import java.util.InputMismatchException;
@@ -114,7 +113,7 @@ public class Repl {
                 case 3:
                     try {
                         ListGamesResult games = client.listGames(authToken);
-                        if(games.games().size() == 0) {
+                        if(games.games().isEmpty()) {
                             System.out.println("There are currently no active games.");
                         } else {
                             int i = 0;
@@ -133,7 +132,7 @@ public class Repl {
                     System.out.print("What will the new game be called?\nName of game: ");
                     String gameName = scanner.next();
                     try {
-                        CreateGameResult game = client.createGame(authToken, gameName);
+                        client.createGame(authToken, gameName);
                         System.out.println(gameName + " was created successfully.");
                     } catch (DataAccessException e) {
                         System.out.println(SET_TEXT_COLOR_RED + "Error in creating game: " + e.getMessage() + SET_TEXT_COLOR_WHITE);
@@ -143,7 +142,7 @@ public class Repl {
                     System.out.println("Of the following games,");
                     try {
                         ListGamesResult games = client.listGames(authToken);
-                        if(games.games().size() == 0) {
+                        if(games.games().isEmpty()) {
                             System.out.println("There are currently no active games. Create a game before trying to join one.");
                         } else {
                             int i = 0;
@@ -180,7 +179,7 @@ public class Repl {
                     System.out.println("Of the following games,");
                     try {
                         ListGamesResult games = client.listGames(authToken);
-                        if(games.games().size() == 0) {
+                        if(games.games().isEmpty()) {
                             System.out.println("There are currently no active games. Create a game before trying to join one.");
                         } else {
                             int i = 0;
@@ -211,13 +210,11 @@ public class Repl {
     private void inGameREPL(Scanner scanner) {
         System.out.println("Drawing initial state of chess game...");
         ChessGame game = new ChessGame();
-        drawBoard(game, "w");
-        drawBoard(game, "b");
+        drawsBoard board1 = new drawsBoard();
+        drawsBoard board2 = new drawsBoard();
+        board1.draw(game, "w");
+        System.out.print("\n");
+        board2.draw(game, "b");
         inGame = 0;
     }
-
-    private void drawBoard(ChessGame game, String player) {
-        System.out.println("Drawing initial state of chess game...");
-    }
-
 }
