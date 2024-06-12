@@ -49,7 +49,7 @@ public class EscapeSequences {
 
     public static final String SET_BG_COLOR_LIGHT_WOOD = "\033[48;2;245;222;179m";
     public static final String SET_BG_COLOR_MEDIUM_LIGHT_BROWN = "\033[48;2;210;180;140m";
-    public static final String SET_BG_COLOR_MEDIUM_BROWN = "\033[48;2;160;82;45m";
+    public static final String SET_BG_COLOR_MEDIUM_BROWN = "\033[48;2;184;115;51m";
     public static final String SET_BG_COLOR_DARK_BROWN = "\033[48;2;139;69;19m";
     public static final String SET_BG_COLOR_VERY_DARK_BROWN = "\033[48;2;101;67;33m";
 
@@ -57,6 +57,7 @@ public class EscapeSequences {
     public static final String SET_TEXT_COLOR_BEIGE = "\033[38;2;245;245;220m";
     public static final String SET_TEXT_COLOR_LIGHT_GRAY = "\033[38;2;211;211;211m";
     public static final String SET_TEXT_COLOR_DARK_GRAY = "\033[38;2;169;169;169m";
+    public static final String SET_TEXT_COLOR_DARKER_GRAY = "\033[38;2;105;105;105m";
     public static final String SET_TEXT_COLOR_BLACK = "\033[38;2;0;0;0m";
 
 
