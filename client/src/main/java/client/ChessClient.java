@@ -42,4 +42,9 @@ public class ChessClient {
         server = new ServerFacade(serverUrl);
         return server.createGame(new CreateGameRequest(authToken, gameName));
     }
+
+    public JoinGameResult joinGame(String authToken, int gameId, String playerColor) throws DataAccessException {
+        server = new ServerFacade(serverUrl);
+        return server.joinGame(new JoinGameRequest(authToken, gameId, playerColor));
+    }
 }

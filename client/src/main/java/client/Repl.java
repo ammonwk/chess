@@ -1,7 +1,5 @@
 package client;
 
-import chess.ChessGame;
-import chess.ChessPiece;
 import dataaccess.DataAccessException;
 import service.CreateGameResult;
 import service.ListGamesResult;
@@ -26,19 +24,17 @@ public class Repl {
         boolean exit = false;
 
         while (!exit) {
-            switch (username) {
-                case null:
-                    exit = beforeLoginREPL(scanner);
-                    break;
-                default:
-                    exit = afterLoginREPL(scanner);
+            if (username == null) {
+                exit = beforeLoginREPL(scanner);
+            } else {
+                afterLoginREPL(scanner);
             }
         }
         scanner.close();
     }
 
     private boolean beforeLoginREPL(Scanner scanner) {
-        System.out.printf(SET_TEXT_COLOR_WHITE + "♕ Welcome to Chess! Please enter a number to choose an option:\n"
+        System.out.print(SET_TEXT_COLOR_WHITE + "♕ Welcome to Chess! Please enter a number to choose an option:\n"
                 + "(1) Help\t\t\t(2) Login\n(3) Register\t\t(4) Quit\n" + "> ");
 
         try {
@@ -48,29 +44,29 @@ public class Repl {
                     System.out.println("If don't have an account yet, start by registering. If you're forgotten your password, that's rough buddy.");
                     break;
                 case 2:
-                    System.out.printf("Enter your username.\n> ");
-                    String username = scanner.next();
-                    System.out.printf("Enter your password.\n> ");
-                    String password = scanner.next();
+                    System.out.print("Enter your username.\n> ");
+                    String enteredUsername = scanner.next();
+                    System.out.print("Enter your password.\n> ");
+                    String enteredPassword = scanner.next();
                     try {
-                        authToken = client.login(username, password);
-                        System.out.println("Welcome, " + username + "!");
-                        this.username = username;
+                        authToken = client.login(enteredUsername, enteredPassword);
+                        System.out.println("Welcome, " + enteredUsername + "!");
+                        username = enteredUsername;
                     } catch (DataAccessException e) {
                         System.out.println(SET_TEXT_COLOR_RED + "Error: Incorrect username or password." + SET_TEXT_COLOR_WHITE);
                     }
                     break;
                 case 3:
-                    System.out.printf("Choose a username.\n> ");
-                    username = scanner.next();
-                    System.out.printf("Choose a password.\n> ");
-                    password = scanner.next();
-                    System.out.printf("Enter your email.\n> ");
+                    System.out.print("Choose a username.\n> ");
+                    String newUsername = scanner.next();
+                    System.out.print("Choose a password.\n> ");
+                    String newPassword = scanner.next();
+                    System.out.print("Enter your email.\n> ");
                     String email = scanner.next();
                     try {
-                        authToken = client.register(username, password, email);
-                        System.out.println("Welcome, " + username + "!");
-                        this.username = username;
+                        authToken = client.register(newUsername, newPassword, email);
+                        System.out.println("Welcome, " + newUsername + "!");
+                        username = newUsername;
                     } catch (DataAccessException e) {
                         System.out.println(SET_TEXT_COLOR_RED + "Registration failed: That username is taken." + SET_TEXT_COLOR_WHITE);
                     }
@@ -89,8 +85,8 @@ public class Repl {
         }
     }
 
-    private boolean afterLoginREPL(Scanner scanner) {
-        System.out.printf(SET_TEXT_COLOR_WHITE + "♕ Welcome, " + username + ", to Chess! Please enter a number to choose an option:\n"
+    private void afterLoginREPL(Scanner scanner) {
+        System.out.print(SET_TEXT_COLOR_WHITE + "♕ Welcome, " + username + ", to Chess! Please enter a number to choose an option:\n"
                 + "(1) Help\t\t\t(2) Logout\t\t\t(3) List Games\n(4) Create Game\t\t(5) Play Game\t\t(6) Observe Game\n" + "> ");
 
         try {
@@ -127,7 +123,7 @@ public class Repl {
                     }
                     break;
                 case 4:
-                    System.out.printf("What will the new game be called?\nName of game: ");
+                    System.out.print("What will the new game be called?\nName of game: ");
                     String gameName = scanner.next();
                     try {
                         CreateGameResult game = client.createGame(authToken, gameName);
@@ -136,14 +132,48 @@ public class Repl {
                         System.out.println(SET_TEXT_COLOR_RED + "Error in creating game: " + e.getMessage() + SET_TEXT_COLOR_WHITE);
                     }
                     break;
+                case 5:
+                    System.out.println("The following games are currently open:");
+                    try {
+                        ListGamesResult games = client.listGames(authToken);
+                        if(games.games().size() == 0) {
+                            System.out.println("There are currently no active games. Create a game before trying to join one.");
+                        } else {
+                            int i = 0;
+                            for (ListGamesResult.GameSummary game : games.games()) {
+                                i = i + 1;
+                                System.out.println(Integer.toString(i) + ") " + game.gameName()
+                                        + " (White user: " + game.whiteUsername() + ", Black user: " + game.blackUsername() + ")");
+                            }
+                            System.out.print("Write a number for which game you would like to join:\n> ");
+                            //int toJoin = scanner.nextInt();
+                            ListGamesResult.GameSummary game = games.games().get(scanner.nextInt() - 1);
+                            String joinColor;
+                            if(game.whiteUsername() == null && game.blackUsername() == null) {
+                                System.out.print("Enter 1 to join as white, or 2 to join as black:\n> ");
+                                joinColor = scanner.nextInt() == 1 ? "WHITE" : "BLACK";
+                            } else if (game.whiteUsername() == null) {
+                                joinColor = "WHITE";
+                            } else if (game.blackUsername() == null) {
+                                joinColor = "BLACK";
+                            } else {
+                                System.out.println("That game is full. White is played by " + game.whiteUsername()
+                                + ", and Black is played by " + game.blackUsername());
+                                break;
+                            }
+                            client.joinGame(authToken, game.gameID(), joinColor);
+                            System.out.println("Successfully joined " + game.gameName() + " as " + joinColor);
+                        }
+                    } catch (DataAccessException e) {
+                        System.out.println(SET_TEXT_COLOR_RED + "Error in joining: " + e.getMessage() + SET_TEXT_COLOR_WHITE);
+                    }
+                    break;
                 default:
                     System.out.println("Invalid choice. Please select a number between 1 and 4");
             }
-            return false;
         } catch (InputMismatchException e) {
             System.out.println("Invalid input. Please enter a number.");
             scanner.next(); // clear the invalid input
-            return false;
         }
     }
 
