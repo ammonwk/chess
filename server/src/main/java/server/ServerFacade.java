@@ -44,7 +44,7 @@ public class ServerFacade {
     }
 
     public ListGamesResult listGames(String auth) throws DataAccessException {
-        var path = "/user";
+        var path = "/game";
         return this.makeRequest("GET", path, auth, ListGamesResult.class);
     }
 
@@ -65,7 +65,12 @@ public class ServerFacade {
             http.setRequestMethod(method);
             http.setDoOutput(true);
 
-            writeBody(request, http);
+            if (request instanceof String authToken) {
+                http.setRequestProperty("Authorization", authToken);
+            } else {
+                writeBody(request, http);
+            }
+
             http.connect();
             throwIfNotSuccessful(http);
             return readBody(http, responseClass);

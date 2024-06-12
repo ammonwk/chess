@@ -3,6 +3,7 @@ package client;
 import chess.ChessGame;
 import chess.ChessPiece;
 import dataaccess.DataAccessException;
+import service.ListGamesResult;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -104,6 +105,24 @@ public class Repl {
                         this.username = null;
                     } catch (DataAccessException e) {
                         System.out.println(SET_TEXT_COLOR_RED + "Error in logging out: " + e.getMessage() + SET_TEXT_COLOR_WHITE);
+                    }
+                    break;
+                case 3:
+                    try {
+                        ListGamesResult games = client.listGames(authToken);
+                        if(games.games().size() == 0) {
+                            System.out.println("There are currently no active games.");
+                        } else {
+                            int i = 0;
+                            System.out.println("The following games were found:");
+                            for (ListGamesResult.GameSummary game : games.games()) {
+                                i = i + 1;
+                                System.out.println(Integer.toString(i) + ") " + game.gameName()
+                                        + " (White user: " + game.whiteUsername() + ", Black user: " + game.blackUsername() + ")");
+                            }
+                        }
+                    } catch (DataAccessException e) {
+                        System.out.println(SET_TEXT_COLOR_RED + "Error in listing games: " + e.getMessage() + SET_TEXT_COLOR_WHITE);
                     }
                     break;
                 default:

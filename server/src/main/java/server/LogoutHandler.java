@@ -17,7 +17,7 @@ public class LogoutHandler implements Route {
     @Override
     public Object handle(Request req, Response res) {
         Gson gson = new Gson();
-        String authToken = gson.fromJson(req.body(), String.class);
+        String authToken = req.headers("Authorization");
 
         if (authToken == null || authToken.isEmpty()) {
             res.status(401);

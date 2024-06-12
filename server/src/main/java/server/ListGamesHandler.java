@@ -16,8 +16,9 @@ public class ListGamesHandler implements Route {
 
     @Override
     public Object handle(Request req, Response res) {
-        String authToken = req.headers("authorization");
         Gson gson = new Gson();
+        String authToken = req.headers("Authorization");
+
         try {
             ListGamesResult result = gameService.listGames(authToken);
             res.status(200);
