@@ -2,6 +2,7 @@ package client;
 
 import chess.ChessGame;
 import chess.ChessPiece;
+import dataaccess.DataAccessException;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -18,6 +19,7 @@ public class Repl {
     public void run() {
         Scanner scanner = new Scanner(System.in);
         boolean exit = false;
+        String authToken = null;
 
         while (!exit) {
             var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
@@ -28,9 +30,24 @@ public class Repl {
                 int choice = scanner.nextInt();
 
                 switch (choice) {
+                    case 1:
+                        System.out.println("Get gud.");
+                        break;
+                    case 2:
+                        System.out.printf("Enter your username.\n> ");
+                        String username = scanner.next();
+                        System.out.printf("Enter your password.\n> ");
+                        String password = scanner.next();
+                        try {
+                            authToken = client.login(username, password);
+                            System.out.println(authToken);
+                        } catch (DataAccessException e) {
+                            System.out.println(SET_TEXT_COLOR_RED + "Login failed: " + e.getMessage() + SET_TEXT_COLOR_WHITE);
+                        }
+                        break;
                     case 4:
                         exit = true;
-                        System.out.println("Thanks for playing! Goodbye");
+                        System.out.println("Thanks for playing! Goodbye.");
                         break;
                     default:
                         System.out.println("Invalid choice. Please select a number between 1 and 4");
