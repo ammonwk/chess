@@ -1,8 +1,8 @@
 package client;
 
 import chess.ChessGame;
-import DTOs.DataAccessException;
-import DTOs.ListGamesResult;
+import dtos.DataAccessException;
+import dtos.ListGamesResult;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -210,8 +210,8 @@ public class Repl {
     private void inGameREPL(Scanner scanner) {
         System.out.println("Drawing initial state of chess game...");
         ChessGame game = new ChessGame();
-        drawsBoard board1 = new drawsBoard();
-        drawsBoard board2 = new drawsBoard();
+        DrawsBoard board1 = new DrawsBoard();
+        DrawsBoard board2 = new DrawsBoard();
         board1.draw(game, "w");
         System.out.print("\n");
         board2.draw(game, "b");

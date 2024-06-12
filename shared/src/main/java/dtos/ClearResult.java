@@ -1,3 +1,3 @@
-package DTOs;
+package dtos;
 
 public record ClearResult(String message) {}

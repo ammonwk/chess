@@ -1,9 +1,9 @@
 package server;
 
-import DTOs.DataAccessException;
-import DTOs.ErrorResult;
-import DTOs.RegisterRequest;
-import DTOs.RegisterResult;
+import dtos.DataAccessException;
+import dtos.ErrorResult;
+import dtos.RegisterRequest;
+import dtos.RegisterResult;
 import com.google.gson.Gson;
 import service.*;
 import model.*;

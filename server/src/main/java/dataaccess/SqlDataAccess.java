@@ -1,6 +1,6 @@
 package dataaccess;
 
-import DTOs.DataAccessException;
+import dtos.DataAccessException;
 import com.google.gson.Gson;
 import java.sql.*;
 

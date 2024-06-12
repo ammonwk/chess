@@ -1,8 +1,8 @@
 package server;
 
-import DTOs.ClearResult;
-import DTOs.DataAccessException;
-import DTOs.ErrorResult;
+import dtos.ClearResult;
+import dtos.DataAccessException;
+import dtos.ErrorResult;
 import com.google.gson.Gson;
 import service.*;
 import spark.Request;

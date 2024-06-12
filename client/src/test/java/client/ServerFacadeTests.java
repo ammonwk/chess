@@ -1,9 +1,9 @@
 package client;
 
-import DTOs.DataAccessException;
+import dtos.DataAccessException;
 import org.junit.jupiter.api.*;
 import server.Server;
-import DTOs.CreateGameResult;
+import dtos.CreateGameResult;
 
 public class ServerFacadeTests {
 

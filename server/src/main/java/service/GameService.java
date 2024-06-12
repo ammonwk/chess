@@ -1,7 +1,7 @@
 package service;
 
-import DTOs.DataAccessException;
-import DTOs.ListGamesResult;
+import dtos.DataAccessException;
+import dtos.ListGamesResult;
 import dataaccess.*;
 import model.*;
 import java.util.List;

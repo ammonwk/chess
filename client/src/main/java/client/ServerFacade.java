@@ -1,5 +1,5 @@
 package client;
-import DTOs.*;
+import dtos.*;
 import com.google.gson.Gson;
 
 import java.io.*;

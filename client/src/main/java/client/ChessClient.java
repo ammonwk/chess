@@ -1,6 +1,6 @@
 package client;
 
-import DTOs.*;
+import dtos.*;
 
 public class ChessClient {
     private ServerFacade server;

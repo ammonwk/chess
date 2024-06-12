@@ -1,4 +1,4 @@
-package DTOs;
+package dtos;
 
 /**
  * Indicates there was an error connecting to the database

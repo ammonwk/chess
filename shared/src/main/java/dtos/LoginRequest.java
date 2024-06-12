@@ -1,3 +1,3 @@
-package DTOs;
+package dtos;
 
 public record LoginRequest(String username, String password) {}

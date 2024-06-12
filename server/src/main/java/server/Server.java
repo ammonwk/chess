@@ -1,6 +1,6 @@
 package server;
 
-import DTOs.DataAccessException;
+import dtos.DataAccessException;
 import dataaccess.*;
 import service.*;
 import spark.Spark;

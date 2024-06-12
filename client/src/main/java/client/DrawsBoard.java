@@ -7,9 +7,9 @@ import chess.ChessPosition;
 
 import static ui.EscapeSequences.*;
 
-public class drawsBoard {
+public class DrawsBoard {
 
-    public drawsBoard() {
+    public DrawsBoard() {
 
     }
 

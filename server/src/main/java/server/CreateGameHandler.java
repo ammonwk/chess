@@ -1,9 +1,9 @@
 package server;
 
-import DTOs.CreateGameRequest;
-import DTOs.CreateGameResult;
-import DTOs.DataAccessException;
-import DTOs.ErrorResult;
+import dtos.CreateGameRequest;
+import dtos.CreateGameResult;
+import dtos.DataAccessException;
+import dtos.ErrorResult;
 import com.google.gson.Gson;
 import service.*;
 import model.*;
