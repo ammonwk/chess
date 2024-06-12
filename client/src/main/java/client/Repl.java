@@ -22,27 +22,43 @@ public class Repl {
         String authToken = null;
 
         while (!exit) {
-            var piece = new ChessPiece(ChessGame.TeamColor.WHITE, ChessPiece.PieceType.PAWN);
-            System.out.printf("♕ Welcome to Chess! Please enter a number to choose an option:\n"
-                    + "(1) Help\n" + "(2) Login\n" + "(3) Register\n" + "(4) Quit\n" + "> ");
+            System.out.printf(SET_TEXT_COLOR_WHITE + "♕ Welcome to Chess! Please enter a number to choose an option:\n"
+                    + "(1) Help\t\t\t(2) Login\n(3) Register\t\t(4) Quit\n" + "> ");
 
             try {
                 int choice = scanner.nextInt();
+                String username;
+                String password;
 
                 switch (choice) {
                     case 1:
-                        System.out.println("Get gud.");
+                        System.out.println("If don't have an account yet, start by registering. If you're forgotten your password, that's rough buddy.");
                         break;
                     case 2:
                         System.out.printf("Enter your username.\n> ");
-                        String username = scanner.next();
+                        username = scanner.next();
                         System.out.printf("Enter your password.\n> ");
-                        String password = scanner.next();
+                        password = scanner.next();
                         try {
                             authToken = client.login(username, password);
+                            System.out.println("Welcome, " + username + "!");
+                            // System.out.println(authToken);
+                        } catch (DataAccessException e) {
+                            System.out.println(SET_TEXT_COLOR_RED + "Error: Incorrect username or password." + SET_TEXT_COLOR_WHITE);
+                        }
+                        break;
+                    case 3:
+                        System.out.printf("Choose a username.\n> ");
+                        username = scanner.next();
+                        System.out.printf("Choose a password.\n> ");
+                        password = scanner.next();
+                        System.out.printf("Enter your email.\n> ");
+                        String email = scanner.next();
+                        try {
+                            authToken = client.register(username, password, email);
                             System.out.println(authToken);
                         } catch (DataAccessException e) {
-                            System.out.println(SET_TEXT_COLOR_RED + "Login failed: " + e.getMessage() + SET_TEXT_COLOR_WHITE);
+                            System.out.println(SET_TEXT_COLOR_RED + "Registration failed: That username is taken." + SET_TEXT_COLOR_WHITE);
                         }
                         break;
                     case 4:
