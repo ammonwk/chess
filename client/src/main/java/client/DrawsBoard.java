@@ -36,7 +36,11 @@ public class DrawsBoard {
 
     public void drawPieces(String player, ChessBoard board) {
         for (int row = 1; row < 9; row++) {
-            drawSquare(String.valueOf(row), SET_TEXT_COLOR_DARKER_GRAY, SET_BG_COLOR_MEDIUM_LIGHT_BROWN);
+            if (player.equals("b")) {
+                drawSquare(String.valueOf(row), SET_TEXT_COLOR_DARKER_GRAY, SET_BG_COLOR_MEDIUM_LIGHT_BROWN);
+            } else {
+                drawSquare(String.valueOf(9-row), SET_TEXT_COLOR_DARKER_GRAY, SET_BG_COLOR_MEDIUM_LIGHT_BROWN);
+            }
             for (int col = 1; col < 9; col++) {
                 ChessPiece piece;
                 if(player == "w") {
@@ -57,7 +61,11 @@ public class DrawsBoard {
                 }
                 drawSquare(print, textColor, backgroundColor);
             }
-            drawSquare(String.valueOf(row), SET_TEXT_COLOR_DARKER_GRAY, SET_BG_COLOR_MEDIUM_LIGHT_BROWN);
+            if (player.equals("b")) {
+                drawSquare(String.valueOf(row), SET_TEXT_COLOR_DARKER_GRAY, SET_BG_COLOR_MEDIUM_LIGHT_BROWN);
+            } else {
+                drawSquare(String.valueOf(9-row), SET_TEXT_COLOR_DARKER_GRAY, SET_BG_COLOR_MEDIUM_LIGHT_BROWN);
+            }
             System.out.print("\n");
         }
     }
