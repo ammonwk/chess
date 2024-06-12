@@ -7,9 +7,7 @@ import java.util.Arrays;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import server.ServerFacade;
-import service.ListGamesResult;
-import service.LoginRequest;
-import service.RegisterRequest;
+import service.*;
 
 public class ChessClient {
     private ServerFacade server;
@@ -38,5 +36,10 @@ public class ChessClient {
     public ListGamesResult listGames(String authToken) throws DataAccessException {
         server = new ServerFacade(serverUrl);
         return server.listGames(authToken);
+    }
+
+    public CreateGameResult createGame(String authToken, String gameName) throws DataAccessException {
+        server = new ServerFacade(serverUrl);
+        return server.createGame(new CreateGameRequest(authToken, gameName));
     }
 }

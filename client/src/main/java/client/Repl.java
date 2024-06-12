@@ -3,6 +3,7 @@ package client;
 import chess.ChessGame;
 import chess.ChessPiece;
 import dataaccess.DataAccessException;
+import service.CreateGameResult;
 import service.ListGamesResult;
 
 import java.util.InputMismatchException;
@@ -123,6 +124,16 @@ public class Repl {
                         }
                     } catch (DataAccessException e) {
                         System.out.println(SET_TEXT_COLOR_RED + "Error in listing games: " + e.getMessage() + SET_TEXT_COLOR_WHITE);
+                    }
+                    break;
+                case 4:
+                    System.out.printf("What will the new game be called?\nName of game: ");
+                    String gameName = scanner.next();
+                    try {
+                        CreateGameResult game = client.createGame(authToken, gameName);
+                        System.out.println(gameName + " was created successfully.");
+                    } catch (DataAccessException e) {
+                        System.out.println(SET_TEXT_COLOR_RED + "Error in creating game: " + e.getMessage() + SET_TEXT_COLOR_WHITE);
                     }
                     break;
                 default:

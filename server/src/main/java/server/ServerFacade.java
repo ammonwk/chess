@@ -49,7 +49,7 @@ public class ServerFacade {
     }
 
     public CreateGameResult createGame(CreateGameRequest req) throws DataAccessException {
-        var path = "/user";
+        var path = "/game";
         return this.makeRequest("POST", path, req, CreateGameResult.class);
     }
 
