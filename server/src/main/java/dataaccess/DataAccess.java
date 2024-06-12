@@ -1,5 +1,6 @@
 package dataaccess;
 
+import DTOs.DataAccessException;
 import model.*;
 import java.util.List;
 

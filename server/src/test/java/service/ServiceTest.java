@@ -1,5 +1,7 @@
 package service;
 
+import DTOs.DataAccessException;
+import DTOs.ListGamesResult;
 import dataaccess.*;
 import model.*;
 import org.junit.jupiter.api.BeforeEach;

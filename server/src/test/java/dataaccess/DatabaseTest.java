@@ -1,18 +1,14 @@
 package dataaccess;
 
+import DTOs.DataAccessException;
 import org.junit.jupiter.api.*;
-import passoff.server.TestServerFacade;
-import server.Server;
 import service.*;
 import model.AuthData;
 import model.GameData;
 import model.UserData;
-import spark.utils.Assert;
 import chess.*;
 
 import java.util.ArrayList;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class DatabaseTest {
     private DataAccess dataAccess;

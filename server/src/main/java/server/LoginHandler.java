@@ -1,12 +1,15 @@
 package server;
 
+import DTOs.DataAccessException;
+import DTOs.ErrorResult;
+import DTOs.LoginRequest;
+import DTOs.LoginResult;
 import com.google.gson.Gson;
 import service.*;
 import model.*;
 import spark.Request;
 import spark.Response;
 import spark.Route;
-import dataaccess.*;
 
 public class LoginHandler implements Route {
     private UserService userService;

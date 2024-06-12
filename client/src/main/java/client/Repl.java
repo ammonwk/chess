@@ -1,8 +1,8 @@
 package client;
 
 import chess.ChessGame;
-import dataaccess.DataAccessException;
-import service.ListGamesResult;
+import DTOs.DataAccessException;
+import DTOs.ListGamesResult;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;

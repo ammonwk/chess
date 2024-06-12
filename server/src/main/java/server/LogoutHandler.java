@@ -1,11 +1,13 @@
 package server;
 
+import DTOs.ClearResult;
+import DTOs.DataAccessException;
+import DTOs.ErrorResult;
 import com.google.gson.Gson;
 import service.*;
 import spark.Request;
 import spark.Response;
 import spark.Route;
-import dataaccess.*;
 
 public class LogoutHandler implements Route {
     private UserService userService;

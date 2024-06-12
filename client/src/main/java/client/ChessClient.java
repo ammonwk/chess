@@ -1,7 +1,6 @@
 package client;
 
-import dataaccess.DataAccessException;
-import service.*;
+import DTOs.*;
 
 public class ChessClient {
     private ServerFacade server;

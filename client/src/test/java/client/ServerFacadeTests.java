@@ -1,11 +1,9 @@
 package client;
 
-import dataaccess.DataAccessException;
-import dataaccess.DatabaseManager;
-import dataaccess.SqlDataAccess;
+import DTOs.DataAccessException;
 import org.junit.jupiter.api.*;
 import server.Server;
-import service.CreateGameResult;
+import DTOs.CreateGameResult;
 
 public class ServerFacadeTests {
 

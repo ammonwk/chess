@@ -1,12 +1,15 @@
 package server;
 
+import DTOs.CreateGameRequest;
+import DTOs.CreateGameResult;
+import DTOs.DataAccessException;
+import DTOs.ErrorResult;
 import com.google.gson.Gson;
 import service.*;
 import model.*;
 import spark.Request;
 import spark.Response;
 import spark.Route;
-import dataaccess.*;
 
 public class CreateGameHandler implements Route {
     private GameService gameService;

@@ -1,7 +1,6 @@
 package client;
+import DTOs.*;
 import com.google.gson.Gson;
-import dataaccess.DataAccessException;
-import service.*;
 
 import java.io.*;
 import java.net.*;
