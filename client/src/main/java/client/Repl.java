@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessGame;
 import dataaccess.DataAccessException;
 import service.CreateGameResult;
 import service.ListGamesResult;
@@ -13,10 +14,12 @@ public class Repl {
     private final ChessClient client;
     private String username;
     private String authToken;
+    private int inGame;
 
     public Repl(String serverUrl) {
         client = new ChessClient(serverUrl);
         username = null;
+        inGame = 0;
     }
 
     public void run() {
@@ -27,7 +30,11 @@ public class Repl {
             if (username == null) {
                 exit = beforeLoginREPL(scanner);
             } else {
-                afterLoginREPL(scanner);
+                if (inGame == 0) {
+                    afterLoginREPL(scanner);
+                } else {
+                    inGameREPL(scanner);
+                }
             }
         }
         scanner.close();
@@ -133,7 +140,7 @@ public class Repl {
                     }
                     break;
                 case 5:
-                    System.out.println("The following games are currently open:");
+                    System.out.println("Of the following games,");
                     try {
                         ListGamesResult games = client.listGames(authToken);
                         if(games.games().size() == 0) {
@@ -158,11 +165,35 @@ public class Repl {
                                 joinColor = "BLACK";
                             } else {
                                 System.out.println("That game is full. White is played by " + game.whiteUsername()
-                                + ", and Black is played by " + game.blackUsername());
+                                        + ", and Black is played by " + game.blackUsername());
                                 break;
                             }
                             client.joinGame(authToken, game.gameID(), joinColor);
                             System.out.println("Successfully joined " + game.gameName() + " as " + joinColor);
+                            inGame = game.gameID();
+                        }
+                    } catch (DataAccessException e) {
+                        System.out.println(SET_TEXT_COLOR_RED + "Error in joining: " + e.getMessage() + SET_TEXT_COLOR_WHITE);
+                    }
+                    break;
+                case 6:
+                    System.out.println("Of the following games,");
+                    try {
+                        ListGamesResult games = client.listGames(authToken);
+                        if(games.games().size() == 0) {
+                            System.out.println("There are currently no active games. Create a game before trying to join one.");
+                        } else {
+                            int i = 0;
+                            for (ListGamesResult.GameSummary game : games.games()) {
+                                i = i + 1;
+                                System.out.println(Integer.toString(i) + ") " + game.gameName()
+                                        + " (White user: " + game.whiteUsername() + ", Black user: " + game.blackUsername() + ")");
+                            }
+                            System.out.print("Write a number for which game you would like to observe:\n> ");
+                            //int toJoin = scanner.nextInt();
+                            ListGamesResult.GameSummary game = games.games().get(scanner.nextInt() - 1);
+                            System.out.println("Observing " + game.gameName() + " as WHITE");
+                            inGame = game.gameID();
                         }
                     } catch (DataAccessException e) {
                         System.out.println(SET_TEXT_COLOR_RED + "Error in joining: " + e.getMessage() + SET_TEXT_COLOR_WHITE);
@@ -175,6 +206,18 @@ public class Repl {
             System.out.println("Invalid input. Please enter a number.");
             scanner.next(); // clear the invalid input
         }
+    }
+
+    private void inGameREPL(Scanner scanner) {
+        System.out.println("Drawing initial state of chess game...");
+        ChessGame game = new ChessGame();
+        drawBoard(game, "w");
+        drawBoard(game, "b");
+        inGame = 0;
+    }
+
+    private void drawBoard(ChessGame game, String player) {
+        System.out.println("Drawing initial state of chess game...");
     }
 
 }
