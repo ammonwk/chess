@@ -1,12 +1,6 @@
 package client;
 
-import static ui.EscapeSequences.*;
-
-import java.util.Arrays;
-
-import com.google.gson.Gson;
 import dataaccess.DataAccessException;
-import server.ServerFacade;
 import service.*;
 
 public class ChessClient {

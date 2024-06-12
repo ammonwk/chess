@@ -1,8 +1,7 @@
-package server;
+package client;
 import com.google.gson.Gson;
 import dataaccess.DataAccessException;
 import service.*;
-import spark.Spark;
 
 import java.io.*;
 import java.net.*;
@@ -14,14 +13,6 @@ public class ServerFacade {
     public ServerFacade(String url) {
         serverUrl = url;
     }
-
-//    Spark.delete("/db", new ClearHandler(dataAccess));
-//    Spark.post("/user", new RegisterHandler(new UserService(dataAccess)));
-//    Spark.post("/session", new LoginHandler(new UserService(dataAccess)));
-//    Spark.delete("/session", new LogoutHandler(new UserService(dataAccess)));
-//    Spark.get("/game", new ListGamesHandler(new GameService(dataAccess)));
-//    Spark.post("/game", new CreateGameHandler(new GameService(dataAccess)));
-//    Spark.put("/game", new JoinGameHandler(new GameService(dataAccess)));
 
     public void clearDatabase() throws DataAccessException {
         var path = "/db";
