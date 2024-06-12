@@ -1,18 +1,32 @@
 package client;
 
+import dataaccess.DataAccessException;
+import dataaccess.DatabaseManager;
+import dataaccess.SqlDataAccess;
 import org.junit.jupiter.api.*;
 import server.Server;
-
+import service.CreateGameResult;
 
 public class ServerFacadeTests {
 
     private static Server server;
+    static int port;
 
     @BeforeAll
     public static void init() {
         server = new Server();
-        var port = server.run(0);
+        port = server.run(0);
         System.out.println("Started test HTTP server on " + port);
+    }
+
+    @BeforeEach
+    public void setUp() {
+        ChessClient client = new ChessClient("http://localhost:" + port);
+        try {
+            client.clear();
+        } catch (DataAccessException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @AfterAll
@@ -22,8 +36,97 @@ public class ServerFacadeTests {
 
 
     @Test
-    public void sampleTest() {
-        Assertions.assertTrue(true);
+    public void registerWorks() {
+        ChessClient client = new ChessClient("http://localhost:" + port);
+        Assertions.assertDoesNotThrow(() -> {client.register("test", "Test", "test");});
     }
 
+    @Test
+    public void registerRequiresUsername() {
+        ChessClient client = new ChessClient("http://localhost:" + port);
+        Assertions.assertThrows(DataAccessException.class, () -> {client.register(null, "Test", "test");});
+    }
+
+    @Test
+    public void loginWorks() {
+        ChessClient client = new ChessClient("http://localhost:" + port);
+        Assertions.assertDoesNotThrow(() -> {client.register("test", "Test", "test");});
+        Assertions.assertDoesNotThrow(() -> {client.login("test", "Test");});
+    }
+
+    @Test
+    public void invalidLoginThrows() {
+        ChessClient client = new ChessClient("http://localhost:" + port);
+        Assertions.assertThrows(DataAccessException.class, () -> {client.login(null, "Test");});
+    }
+
+    @Test
+    public void logoutWorks() {
+        ChessClient client = new ChessClient("http://localhost:" + port);
+        Assertions.assertDoesNotThrow(() -> {
+            client.register("test", "Test", "test");
+            String auth = client.login("test", "Test");
+            client.logout(auth);
+        });
+    }
+
+    @Test
+    public void invalidLogoutThrows() {
+        ChessClient client = new ChessClient("http://localhost:" + port);
+        Assertions.assertThrows(DataAccessException.class, () -> {client.logout("Test");});
+    }
+
+    @Test
+    public void createGameWorks() {
+        ChessClient client = new ChessClient("http://localhost:" + port);
+        Assertions.assertDoesNotThrow(() -> {
+            client.register("test", "Test", "test");
+            String auth = client.login("test", "Test");
+            client.createGame(auth, "test");
+        });
+    }
+
+    @Test
+    public void createGameThrows() {
+        ChessClient client = new ChessClient("http://localhost:" + port);
+        Assertions.assertThrows(DataAccessException.class, () -> {client.createGame("Test", "test");});
+    }
+
+    @Test
+    public void listGamesWorks() {
+        ChessClient client = new ChessClient("http://localhost:" + port);
+        Assertions.assertDoesNotThrow(() -> {
+            client.register("test", "Test", "test");
+            String auth = client.login("test", "Test");
+            client.createGame(auth, "test");
+            Assertions.assertEquals(1, client.listGames(auth).games().size());
+        });
+    }
+
+    @Test
+    public void listGamesEmpty() {
+        ChessClient client = new ChessClient("http://localhost:" + port);
+        Assertions.assertDoesNotThrow(() -> {
+            client.register("test", "Test", "test");
+            String auth = client.login("test", "Test");
+            Assertions.assertEquals(0, client.listGames(auth).games().size());
+        });
+    }
+
+    @Test
+    public void joinGameWorks() {
+        ChessClient client = new ChessClient("http://localhost:" + port);
+        Assertions.assertDoesNotThrow(() -> {
+            client.register("test", "Test", "test");
+            String auth = client.login("test", "Test");
+            CreateGameResult game = client.createGame(auth, "test");
+            client.joinGame(auth, game.gameID(), "WHITE");
+        });
+    }
+
+    @Test
+    public void joinGameThrows() {
+        ChessClient client = new ChessClient("http://localhost:" + port);
+        Assertions.assertThrows(DataAccessException.class, () -> {client.joinGame("Test", 1, "WHITE");});
+    }
 }

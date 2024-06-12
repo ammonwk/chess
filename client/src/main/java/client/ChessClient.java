@@ -18,6 +18,11 @@ public class ChessClient {
         this.serverUrl = serverUrl;
     }
 
+    public void clear() throws DataAccessException {
+        server = new ServerFacade(serverUrl);
+        server.clearDatabase();
+    }
+
     public String register(String username, String password, String email) throws DataAccessException {
         server = new ServerFacade(serverUrl);
         return server.registerUser(new RegisterRequest(username, password, email)).authToken();
