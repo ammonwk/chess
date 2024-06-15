@@ -3,7 +3,9 @@ package client;
 import chess.ChessGame;
 import dtos.DataAccessException;
 import dtos.ListGamesResult;
+import model.GameData;
 
+import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -208,6 +210,23 @@ public class Repl {
     }
 
     private void inGameREPL(Scanner scanner) {
+        String gameName = "";
+        try {
+            ListGamesResult allGames = client.listGames(authToken);
+            for(ListGamesResult.GameSummary game : allGames.games()) {
+                if(game.gameID() == inGame) {
+                    gameName = game.gameName();
+                }
+            }
+        } catch (DataAccessException e) {
+            System.out.println(SET_TEXT_COLOR_RED + "Authentication error. Please log in again." + SET_TEXT_COLOR_WHITE);
+            inGame = 0;
+        }
+
+        System.out.print(SET_TEXT_COLOR_WHITE + username + ", you are in the game \"" + gameName + "\". Please enter a number to choose an option:\n"
+        + "(1) Help\t\t\t(2) Redraw Chess Board\t\t\t(3) Leave\n(4) Make Move\t\t(5) Resign\t\t(6) Highlight Legal Moves\n" + "> ");
+
+
         System.out.println("Drawing initial state of chess game...");
         ChessGame game = new ChessGame();
         DrawsBoard board1 = new DrawsBoard();
