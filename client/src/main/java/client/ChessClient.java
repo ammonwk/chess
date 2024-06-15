@@ -1,6 +1,7 @@
 package client;
 
 import dtos.*;
+import model.GameData;
 
 public class ChessClient {
     private ServerFacade server;
@@ -45,4 +46,5 @@ public class ChessClient {
         server = new ServerFacade(serverUrl);
         return server.joinGame(new JoinGameRequest(authToken, gameId, playerColor));
     }
+
 }

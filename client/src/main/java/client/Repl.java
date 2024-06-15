@@ -211,29 +211,60 @@ public class Repl {
 
     private void inGameREPL(Scanner scanner) {
         String gameName = "";
+        String color = "";
+        ChessGame game = new ChessGame();
+        DrawsBoard drawsBoard = new DrawsBoard();
         try {
             ListGamesResult allGames = client.listGames(authToken);
-            for(ListGamesResult.GameSummary game : allGames.games()) {
-                if(game.gameID() == inGame) {
-                    gameName = game.gameName();
+            for(ListGamesResult.GameSummary possibleGame : allGames.games()) {
+                if(possibleGame.gameID() == inGame) {
+                    gameName = possibleGame.gameName();
+                    if(possibleGame.whiteUsername().equals(username)) {
+                        color = "w";
+                    } else if(possibleGame.blackUsername().equals(username)) {
+                        color = "b";
+                    } else {
+                        System.out.println(color);
+                        System.out.println(SET_TEXT_COLOR_RED + "Authentication error. Please log in again." + SET_TEXT_COLOR_WHITE);
+                        inGame = 0;
+                    }
                 }
+            }
+            if(gameName.equals("") || color.equals("")) {
+                System.out.println(SET_TEXT_COLOR_RED + "Authentication error. Please log in again." + SET_TEXT_COLOR_WHITE);
+                inGame = 0;
             }
         } catch (DataAccessException e) {
             System.out.println(SET_TEXT_COLOR_RED + "Authentication error. Please log in again." + SET_TEXT_COLOR_WHITE);
             inGame = 0;
         }
 
-        System.out.print(SET_TEXT_COLOR_WHITE + username + ", you are in the game \"" + gameName + "\". Please enter a number to choose an option:\n"
-        + "(1) Help\t\t\t(2) Redraw Chess Board\t\t\t(3) Leave\n(4) Make Move\t\t(5) Resign\t\t(6) Highlight Legal Moves\n" + "> ");
+        System.out.print(SET_TEXT_COLOR_WHITE + username + ", you are playing as " + (color.equals("w") ? "white" : "black")
+                + " in the game \"" + gameName + "\". Please enter a number to choose an option:\n"
+                + "(1) Help\t\t\t(2) Redraw Chess Board\t\t\t(3) Leave\n(4) Make Move\t\t(5) Resign"
+                + "\t\t(6) Highlight Legal Moves\n" + "> ");
 
-
-        System.out.println("Drawing initial state of chess game...");
-        ChessGame game = new ChessGame();
-        DrawsBoard board1 = new DrawsBoard();
-        DrawsBoard board2 = new DrawsBoard();
-        board1.draw(game, "w");
-        System.out.print("\n");
-        board2.draw(game, "b");
-        inGame = 0;
+        try {
+            int choice = scanner.nextInt();
+            switch (choice) {
+                case 1:
+                    System.out.println("Go ahead and choose an option, you'll be given more instructions at that point.");
+                    break;
+                case 2:
+                    System.out.println("Drawing initial state of chess game...");
+                    drawsBoard.draw(game, color);
+                    System.out.print("\n");
+                    break;
+                case 3:
+                    inGame = 0;
+                    System.out.println("Leaving game...\nGoodbye.");
+                    break;
+                default:
+                    System.out.println("Invalid input. Please enter a number.");
+            }
+        } catch (InputMismatchException e) {
+            System.out.println("Invalid input. Please enter a number.");
+            scanner.next();
+        }
     }
 }
