@@ -2,6 +2,7 @@ package client.websocket;
 
 import com.google.gson.Gson;
 import dtos.DataAccessException;
+import websocket.commands.ConnectCommand;
 import websocket.messages.NotificationMessage;
 
 import javax.websocket.*;
@@ -29,6 +30,7 @@ public class WebSocketFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
+                    System.out.println("Got message: " + message);
                     NotificationMessage notification = new Gson().fromJson(message, NotificationMessage.class);
                     notificationHandler.notify(notification);
                 }
@@ -41,6 +43,15 @@ public class WebSocketFacade extends Endpoint {
     //Endpoint requires this method, but you don't have to do anything
     @Override
     public void onOpen(Session session, EndpointConfig endpointConfig) {
+    }
+
+    public void register(String authToken, int GameId, String username) throws DataAccessException {
+        try {
+            ConnectCommand command = new ConnectCommand(authToken, GameId, username);
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
+        } catch (IOException e) {
+            throw new DataAccessException(e.getMessage());
+        }
     }
 
 //    public void enterPetShop(String visitorName) throws DataAccessException {

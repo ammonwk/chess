@@ -1,13 +1,16 @@
 package websocket;
 
 import com.google.gson.Gson;
+import org.eclipse.jetty.io.EofException;
 import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import websocket.commands.ConnectCommand;
 import websocket.messages.NotificationMessage;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 
 @WebSocket
@@ -34,9 +37,23 @@ public class WebSocketHandler {
 
     private void connect(ConnectCommand connectCommand, Session session) throws IOException {
         connections.add(connectCommand.getAuthString(), session);
-        var message = String.format("%s is connected", connectCommand.getAuthString());
+        var message = String.format("%s is connected", connectCommand.getUsername());
         var notification = new NotificationMessage(message);
         connections.broadcast(connectCommand.getAuthString(), notification);
+        System.out.println("Sent notification: " + notification);
+    }
+
+    @OnWebSocketError
+    public void onError(Session session, Throwable error) {
+        if (error instanceof EofException) {
+            System.err.println("Client " + session.getRemoteAddress() + " closed the connection.");
+        } else if (error instanceof TimeoutException) {
+            System.err.println("Client " + session.getRemoteAddress() + " timed out.");
+        } else {
+            System.err.println("WebSocket error: " + error.getMessage());
+            error.printStackTrace();
+        }
+        session.close();
     }
 
 //    private void enter(String visitorName, Session session) throws IOException {
