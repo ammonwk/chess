@@ -1,7 +1,5 @@
 package websocket.messages;
 
-import websocket.commands.UserGameCommand;
-
 public class ErrorMessage extends ServerMessage {
     public String message;
 

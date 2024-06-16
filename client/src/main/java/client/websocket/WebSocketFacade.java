@@ -2,8 +2,7 @@ package client.websocket;
 
 import com.google.gson.Gson;
 import dtos.DataAccessException;
-import webSocketMessages.Action;
-import webSocketMessages.Notification;
+import websocket.messages.NotificationMessage;
 
 import javax.websocket.*;
 import java.io.IOException;
@@ -30,7 +29,7 @@ public class WebSocketFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    Notification notification = new Gson().fromJson(message, Notification.class);
+                    NotificationMessage notification = new Gson().fromJson(message, NotificationMessage.class);
                     notificationHandler.notify(notification);
                 }
             });
@@ -44,23 +43,23 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
-    public void enterPetShop(String visitorName) throws DataAccessException {
-        try {
-            var action = new Action(Action.Type.ENTER, visitorName);
-            this.session.getBasicRemote().sendText(new Gson().toJson(action));
-        } catch (IOException ex) {
-            throw new DataAccessException(ex.getMessage());
-        }
-    }
-
-    public void leavePetShop(String visitorName) throws DataAccessException {
-        try {
-            var action = new Action(Action.Type.EXIT, visitorName);
-            this.session.getBasicRemote().sendText(new Gson().toJson(action));
-            this.session.close();
-        } catch (IOException ex) {
-            throw new DataAccessException(ex.getMessage());
-        }
-    }
+//    public void enterPetShop(String visitorName) throws DataAccessException {
+//        try {
+//            var action = new Action(Action.Type.ENTER, visitorName);
+//            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+//        } catch (IOException ex) {
+//            throw new DataAccessException(ex.getMessage());
+//        }
+//    }
+//
+//    public void leavePetShop(String visitorName) throws DataAccessException {
+//        try {
+//            var action = new Action(Action.Type.EXIT, visitorName);
+//            this.session.getBasicRemote().sendText(new Gson().toJson(action));
+//            this.session.close();
+//        } catch (IOException ex) {
+//            throw new DataAccessException(ex.getMessage());
+//        }
+//    }
 
 }
