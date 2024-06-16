@@ -1,9 +1,11 @@
 package client;
 
 import chess.ChessGame;
+import client.websocket.NotificationHandler;
 import dtos.DataAccessException;
 import dtos.ListGamesResult;
 import model.GameData;
+import websocket.messages.NotificationMessage;
 
 import java.util.ArrayList;
 import java.util.InputMismatchException;
@@ -11,7 +13,7 @@ import java.util.Scanner;
 
 import static ui.EscapeSequences.*;
 
-public class Repl {
+public class Repl implements NotificationHandler {
     private final ChessClient client;
     private String username;
     private String authToken;
@@ -266,5 +268,9 @@ public class Repl {
             System.out.println("Invalid input. Please enter a number.");
             scanner.next();
         }
+    }
+
+    public void notify(NotificationMessage notification) {
+        System.out.println(SET_TEXT_COLOR_WHITE + notification);
     }
 }

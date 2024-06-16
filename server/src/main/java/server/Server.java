@@ -4,8 +4,15 @@ import dtos.DataAccessException;
 import dataaccess.*;
 import service.*;
 import spark.Spark;
+import websocket.WebSocketHandler;
 
 public class Server {
+
+    private final WebSocketHandler webSocketHandler;
+
+    public Server() {
+        webSocketHandler = new WebSocketHandler();
+    }
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
@@ -17,6 +24,8 @@ public class Server {
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
+
+        Spark.webSocket("/ws", webSocketHandler);
 
         Spark.delete("/db", new ClearHandler(dataAccess));
         Spark.post("/user", new RegisterHandler(new UserService(dataAccess)));
