@@ -200,7 +200,8 @@ public class Repl implements NotificationHandler {
                             //int toJoin = scanner.nextInt();
                             ListGamesResult.GameSummary game = games.games().get(scanner.nextInt() - 1);
                             System.out.println("Observing " + game.gameName() + " as WHITE");
-                            inGame = game.gameID();
+                            client.observeGame(authToken, game.gameID());
+                            // inGame = game.gameID();
                         }
                     } catch (DataAccessException e) {
                         System.out.println(SET_TEXT_COLOR_RED + "Error in joining: " + e.getMessage() + SET_TEXT_COLOR_WHITE);
@@ -303,6 +304,7 @@ public class Repl implements NotificationHandler {
             System.out.println(SET_TEXT_COLOR_RED + "Authentication error. Please log in again." + SET_TEXT_COLOR_WHITE);
             inGame = 0;
         }
+        System.out.print("\n");
         DrawsBoard drawsBoard = new DrawsBoard();
         drawsBoard.draw(game, color);
     }

@@ -79,15 +79,7 @@ public class WebSocketHandler {
             return;
         }
         gameConnections.put(session.hashCode(), gameData.gameID());
-        String message;
-        if (gameData.whiteUsername().equals(username)) {
-            message = String.format("%s joined the game as White.", username);
-        } else if (gameData.blackUsername().equals(username)) {
-            message = String.format("%s joined the game as Black.", username);
-        } else {
-            message = String.format("%s joined the game as an observer.", username);
-        }
-        var notification = new NotificationMessage(message);
+        var notification = getNotificationMessage(gameData, username);
         List<Integer> toNotify;
         try {
             toNotify = getUsernamesForGame(gameData.gameID());
@@ -103,6 +95,19 @@ public class WebSocketHandler {
                 game);
         System.out.println("Sent game: " + game.toString());
         System.out.println("Sent notification: " + notification);
+    }
+
+    private static NotificationMessage getNotificationMessage(GameData gameData, String username) {
+        String message;
+        if (gameData.whiteUsername() != null && gameData.whiteUsername().equals(username)) {
+            message = String.format("%s joined the game as White.", username);
+        } else if (gameData.blackUsername() != null && gameData.blackUsername().equals(username)) {
+            message = String.format("%s joined the game as Black.", username);
+        } else {
+            message = String.format("%s joined the game as an observer.", username);
+        }
+        var notification = new NotificationMessage(message);
+        return notification;
     }
 
     private void leave(LeaveCommand leaveCommand, Session session) {
