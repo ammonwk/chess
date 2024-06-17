@@ -1,5 +1,8 @@
 package client.websocket;
 
+import chess.ChessGame;
+import client.DrawsBoard;
+import client.Repl;
 import com.google.gson.Gson;
 import dtos.DataAccessException;
 import websocket.commands.ConnectCommand;
@@ -31,6 +34,12 @@ public class WebSocketFacade extends Endpoint {
                 @Override
                 public void onMessage(String message) {
                     System.out.println("Got message: " + message);
+                    if(message.contains("sendGame=")) {
+                        message = message.replace("sendGame=", "");
+                        ChessGame game = new Gson().fromJson(message, ChessGame.class);
+
+                        notificationHandler.drawBoard(game);
+                    }
                     NotificationMessage notification = new Gson().fromJson(message, NotificationMessage.class);
                     notificationHandler.notify(notification);
                 }
@@ -45,9 +54,9 @@ public class WebSocketFacade extends Endpoint {
     public void onOpen(Session session, EndpointConfig endpointConfig) {
     }
 
-    public void register(String authToken, int GameId, String username) throws DataAccessException {
+    public void connect(String authToken, int GameId) throws DataAccessException {
         try {
-            ConnectCommand command = new ConnectCommand(authToken, GameId, username);
+            ConnectCommand command = new ConnectCommand(authToken, GameId);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
         } catch (IOException e) {
             throw new DataAccessException(e.getMessage());

@@ -1,5 +1,6 @@
 package service;
 
+import chess.ChessGame;
 import dtos.DataAccessException;
 import dtos.ListGamesResult;
 import dataaccess.*;
@@ -28,7 +29,7 @@ public class GameService {
         while (dataAccess.getGame(gameID) != null) {
             gameID = UUID.randomUUID().hashCode();
         }
-        GameData gameData = new GameData(gameID, null, null, gameName, null);
+        GameData gameData = new GameData(gameID, null, null, gameName, new ChessGame());
         dataAccess.createGame(gameData);
         return gameData;
     }

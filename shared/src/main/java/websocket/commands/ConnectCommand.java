@@ -1,13 +1,14 @@
 package websocket.commands;
 
-public class ConnectCommand extends UserGameCommand {
-    public int gameId;
-    public String username;
+import com.google.gson.annotations.SerializedName;
 
-    public ConnectCommand(String authToken, int gameId, String username) {
+public class ConnectCommand extends UserGameCommand {
+    @SerializedName("gameID")
+    public int gameId;
+
+    public ConnectCommand(String authToken, int gameId) {
         super(authToken);
         this.gameId = gameId;
-        this.username = username;
         commandType = CommandType.CONNECT;
     }
 
@@ -15,7 +16,4 @@ public class ConnectCommand extends UserGameCommand {
         return gameId;
     }
 
-    public String getUsername() {
-        return username;
-    }
 }

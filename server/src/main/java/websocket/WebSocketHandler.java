@@ -1,7 +1,12 @@
 package websocket;
 
+import chess.ChessGame;
 import com.google.gson.Gson;
+import dataaccess.DataAccess;
+import dtos.DataAccessException;
+import model.GameData;
 import org.eclipse.jetty.io.EofException;
+import org.eclipse.jetty.util.IO;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
@@ -17,9 +22,13 @@ import java.util.concurrent.TimeoutException;
 public class WebSocketHandler {
 
     private final ConnectionManager connections = new ConnectionManager();
+    private final DataAccess dataAccess;
 
+    public WebSocketHandler(DataAccess dataAccess){
+        this.dataAccess = dataAccess;
+    }
     @OnWebSocketMessage
-    public void onMessage(Session session, String message) throws IOException {
+    public void onMessage(Session session, String message) throws IOException, DataAccessException {
         if (message.contains("CONNECT")) {
             ConnectCommand command = new Gson().fromJson(message, ConnectCommand.class);
             connect(command, session);
@@ -35,12 +44,24 @@ public class WebSocketHandler {
 //        }
     }
 
-    private void connect(ConnectCommand connectCommand, Session session) throws IOException {
-        connections.add(connectCommand.getAuthString(), session);
-        var message = String.format("%s is connected", connectCommand.getUsername());
-        var notification = new NotificationMessage(message);
-        connections.broadcast(connectCommand.getAuthString(), notification);
-        System.out.println("Sent notification: " + notification);
+    private void connect(ConnectCommand connectCommand, Session session) {
+        try {
+            connections.add(connectCommand.getAuthString(), session);
+            String username = dataAccess.getAuth(connectCommand.getAuthString()).username();
+            var message = String.format("%s joined the game.", username);
+            var notification = new NotificationMessage(message);
+            connections.broadcast(connectCommand.getAuthString(), notification);
+            GameData gameData = dataAccess.getGame(connectCommand.getGameId());
+            ChessGame game = gameData.game();
+            connections.sendGame(connectCommand.getAuthString(),
+                    game);
+            System.out.println("Sent game: " + game.toString());
+            System.out.println("Sent notification: " + notification);
+        } catch (DataAccessException e) {
+            System.out.println("DataAccessException: " + e.getMessage());
+        } catch (IOException e) {
+            System.out.println("IOException: " + e.getMessage());
+        }
     }
 
     @OnWebSocketError
@@ -49,9 +70,6 @@ public class WebSocketHandler {
             System.err.println("Client " + session.getRemoteAddress() + " closed the connection.");
         } else if (error instanceof TimeoutException) {
             System.err.println("Client " + session.getRemoteAddress() + " timed out.");
-        } else {
-            System.err.println("WebSocket error: " + error.getMessage());
-            error.printStackTrace();
         }
         session.close();
     }

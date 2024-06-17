@@ -11,7 +11,7 @@ public class ChessClient {
     private final NotificationHandler notificationHandler;
     private WebSocketFacade webSocket;
 
-    public ChessClient(String serverUrl, NotificationHandler notificationHandler ) {
+    public ChessClient(String serverUrl, NotificationHandler notificationHandler) {
         server = new ServerFacade(serverUrl);
         this.serverUrl = serverUrl;
         this.notificationHandler = notificationHandler;
@@ -26,7 +26,6 @@ public class ChessClient {
         server = new ServerFacade(serverUrl);
         String result = server.registerUser(new RegisterRequest(username, password, email)).authToken();
         webSocket = new WebSocketFacade(serverUrl, notificationHandler);
-        webSocket.register(result, 0, username);
         return result;
     }
 
@@ -54,6 +53,7 @@ public class ChessClient {
 
     public JoinGameResult joinGame(String authToken, int gameId, String playerColor) throws DataAccessException {
         server = new ServerFacade(serverUrl);
+        webSocket.connect(authToken, gameId);
         return server.joinGame(new JoinGameRequest(authToken, gameId, playerColor));
     }
 

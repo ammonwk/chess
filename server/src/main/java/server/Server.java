@@ -8,11 +8,7 @@ import websocket.WebSocketHandler;
 
 public class Server {
 
-    private final WebSocketHandler webSocketHandler;
-
-    public Server() {
-        webSocketHandler = new WebSocketHandler();
-    }
+    private WebSocketHandler webSocketHandler;
 
     public int run(int desiredPort) {
         Spark.port(desiredPort);
@@ -24,6 +20,8 @@ public class Server {
         } catch (DataAccessException e) {
             throw new RuntimeException(e);
         }
+
+        webSocketHandler = new WebSocketHandler(dataAccess);
 
         Spark.webSocket("/ws", webSocketHandler);
 

@@ -1,5 +1,7 @@
 package websocket;
 
+import chess.ChessGame;
+import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
 import websocket.messages.NotificationMessage;
 
@@ -17,6 +19,24 @@ public class ConnectionManager {
 
     public void remove(String username) {
         connections.remove(username);
+    }
+
+    public void sendGame(String userAuth, ChessGame game) throws IOException {
+        var removeList = new ArrayList<Connection>();
+        for (var c : connections.values()) {
+            if (c.session.isOpen()) {
+                if (userAuth.equals(c.username)) {
+                    c.send("sendGame=" + new Gson().toJson(game));
+                }
+            } else {
+                removeList.add(c);
+            }
+        }
+
+        // Clean up any connections that were left open.
+        for (var c : removeList) {
+            connections.remove(c.username);
+        }
     }
 
     public void broadcast(String excludeVisitorName, NotificationMessage notification) throws IOException {

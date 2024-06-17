@@ -270,6 +270,28 @@ public class Repl implements NotificationHandler {
         }
     }
 
+    @Override
+    public void drawBoard(ChessGame game) {
+        String color = "";
+        try {
+            ListGamesResult allGames = client.listGames(authToken);
+            for(ListGamesResult.GameSummary possibleGame : allGames.games()) {
+                if(possibleGame.gameID() == inGame) {
+                    if(possibleGame.whiteUsername().equals(username)) {
+                        color = "w";
+                    } else if(possibleGame.blackUsername().equals(username)) {
+                        color = "b";
+                    }
+                }
+            }
+        } catch (DataAccessException e) {
+            System.out.println(SET_TEXT_COLOR_RED + "Authentication error. Please log in again." + SET_TEXT_COLOR_WHITE);
+            inGame = 0;
+        }
+        DrawsBoard drawsBoard = new DrawsBoard();
+        drawsBoard.draw(game, color);
+    }
+
     public void notify(NotificationMessage notification) {
         System.out.println(SET_TEXT_COLOR_WHITE + notification);
     }

@@ -19,7 +19,7 @@ public class ServerFacadeTests {
 
     @BeforeEach
     public void setUp() {
-        ChessClient client = new ChessClient("http://localhost:" + port);
+        ChessClient client = new ChessClient("http://localhost:" + port, null);
         try {
             client.clear();
         } catch (DataAccessException e) {
@@ -35,32 +35,32 @@ public class ServerFacadeTests {
 
     @Test
     public void registerWorks() {
-        ChessClient client = new ChessClient("http://localhost:" + port);
+        ChessClient client = new ChessClient("http://localhost:" + port, null);
         Assertions.assertDoesNotThrow(() -> {client.register("test", "Test", "test");});
     }
 
     @Test
     public void registerRequiresUsername() {
-        ChessClient client = new ChessClient("http://localhost:" + port);
+        ChessClient client = new ChessClient("http://localhost:" + port, null);
         Assertions.assertThrows(DataAccessException.class, () -> {client.register(null, "Test", "test");});
     }
 
     @Test
     public void loginWorks() {
-        ChessClient client = new ChessClient("http://localhost:" + port);
+        ChessClient client = new ChessClient("http://localhost:" + port, null);
         Assertions.assertDoesNotThrow(() -> {client.register("test", "Test", "test");});
         Assertions.assertDoesNotThrow(() -> {client.login("test", "Test");});
     }
 
     @Test
     public void invalidLoginThrows() {
-        ChessClient client = new ChessClient("http://localhost:" + port);
+        ChessClient client = new ChessClient("http://localhost:" + port, null);
         Assertions.assertThrows(DataAccessException.class, () -> {client.login(null, "Test");});
     }
 
     @Test
     public void logoutWorks() {
-        ChessClient client = new ChessClient("http://localhost:" + port);
+        ChessClient client = new ChessClient("http://localhost:" + port, null);
         Assertions.assertDoesNotThrow(() -> {
             client.register("test", "Test", "test");
             String auth = client.login("test", "Test");
@@ -70,13 +70,13 @@ public class ServerFacadeTests {
 
     @Test
     public void invalidLogoutThrows() {
-        ChessClient client = new ChessClient("http://localhost:" + port);
+        ChessClient client = new ChessClient("http://localhost:" + port, null);
         Assertions.assertThrows(DataAccessException.class, () -> {client.logout("Test");});
     }
 
     @Test
     public void createGameWorks() {
-        ChessClient client = new ChessClient("http://localhost:" + port);
+        ChessClient client = new ChessClient("http://localhost:" + port, null);
         Assertions.assertDoesNotThrow(() -> {
             client.register("test", "Test", "test");
             String auth = client.login("test", "Test");
@@ -86,13 +86,13 @@ public class ServerFacadeTests {
 
     @Test
     public void createGameThrows() {
-        ChessClient client = new ChessClient("http://localhost:" + port);
+        ChessClient client = new ChessClient("http://localhost:" + port, null);
         Assertions.assertThrows(DataAccessException.class, () -> {client.createGame("Test", "test");});
     }
 
     @Test
     public void listGamesWorks() {
-        ChessClient client = new ChessClient("http://localhost:" + port);
+        ChessClient client = new ChessClient("http://localhost:" + port, null);
         Assertions.assertDoesNotThrow(() -> {
             client.register("test", "Test", "test");
             String auth = client.login("test", "Test");
@@ -103,7 +103,7 @@ public class ServerFacadeTests {
 
     @Test
     public void listGamesEmpty() {
-        ChessClient client = new ChessClient("http://localhost:" + port);
+        ChessClient client = new ChessClient("http://localhost:" + port, null);
         Assertions.assertDoesNotThrow(() -> {
             client.register("test", "Test", "test");
             String auth = client.login("test", "Test");
@@ -113,7 +113,7 @@ public class ServerFacadeTests {
 
     @Test
     public void joinGameWorks() {
-        ChessClient client = new ChessClient("http://localhost:" + port);
+        ChessClient client = new ChessClient("http://localhost:" + port, null);
         Assertions.assertDoesNotThrow(() -> {
             client.register("test", "Test", "test");
             String auth = client.login("test", "Test");
@@ -124,7 +124,7 @@ public class ServerFacadeTests {
 
     @Test
     public void joinGameThrows() {
-        ChessClient client = new ChessClient("http://localhost:" + port);
+        ChessClient client = new ChessClient("http://localhost:" + port, null);
         Assertions.assertThrows(DataAccessException.class, () -> {client.joinGame("Test", 1, "WHITE");});
     }
 }
