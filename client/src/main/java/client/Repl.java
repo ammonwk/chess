@@ -10,6 +10,7 @@ import websocket.messages.NotificationMessage;
 import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 import static ui.EscapeSequences.*;
 
@@ -241,6 +242,11 @@ public class Repl implements NotificationHandler {
             inGame = 0;
         }
 
+        try { // Wait for the ChessBoard to come back
+            TimeUnit.MILLISECONDS.sleep(200);
+        } catch (InterruptedException e) {
+            // ignore it
+        }
         System.out.print(SET_TEXT_COLOR_WHITE + username + ", you are playing as " + (color.equals("w") ? "white" : "black")
                 + " in the game \"" + gameName + "\". Please enter a number to choose an option:\n"
                 + "(1) Help\t\t\t(2) Redraw Chess Board\t\t\t(3) Leave\n(4) Make Move\t\t(5) Resign"
@@ -293,6 +299,10 @@ public class Repl implements NotificationHandler {
     }
 
     public void notify(NotificationMessage notification) {
-        System.out.println(SET_TEXT_COLOR_WHITE + notification);
+        System.out.println(SET_TEXT_COLOR_WHITE + notification + RESET_TEXT_COLOR);
+    }
+
+    public void error(NotificationMessage notification) {
+        System.out.println(SET_TEXT_COLOR_RED + notification + RESET_TEXT_COLOR);
     }
 }

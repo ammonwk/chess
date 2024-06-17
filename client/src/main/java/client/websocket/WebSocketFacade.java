@@ -6,12 +6,16 @@ import client.Repl;
 import com.google.gson.Gson;
 import dtos.DataAccessException;
 import websocket.commands.ConnectCommand;
+import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
+import static ui.EscapeSequences.*;
 
 import javax.websocket.*;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+
+import static ui.EscapeSequences.SET_TEXT_COLOR_WHITE;
 
 //need to extend Endpoint for websocket to work properly
 public class WebSocketFacade extends Endpoint {
@@ -33,15 +37,16 @@ public class WebSocketFacade extends Endpoint {
             this.session.addMessageHandler(new MessageHandler.Whole<String>() {
                 @Override
                 public void onMessage(String message) {
-                    System.out.println("Got message: " + message);
-                    if(message.contains("sendGame=")) {
-                        message = message.replace("sendGame=", "");
-                        ChessGame game = new Gson().fromJson(message, ChessGame.class);
-
+                    if(message.contains("LOAD_GAME")) {
+                        ChessGame game = new Gson().fromJson(message, LoadGameMessage.class).game;
                         notificationHandler.drawBoard(game);
+                    } else if (message.contains("NOTIFICATION")) {
+                        NotificationMessage notification = new Gson().fromJson(message, NotificationMessage.class);
+                        notificationHandler.notify(notification);
+                    } else if(message.contains("ERROR")) {
+                        NotificationMessage notification = new Gson().fromJson(message, NotificationMessage.class);
+                        notificationHandler.notify(notification);
                     }
-                    NotificationMessage notification = new Gson().fromJson(message, NotificationMessage.class);
-                    notificationHandler.notify(notification);
                 }
             });
         } catch (DeploymentException | IOException | URISyntaxException ex) {
@@ -62,24 +67,5 @@ public class WebSocketFacade extends Endpoint {
             throw new DataAccessException(e.getMessage());
         }
     }
-
-//    public void enterPetShop(String visitorName) throws DataAccessException {
-//        try {
-//            var action = new Action(Action.Type.ENTER, visitorName);
-//            this.session.getBasicRemote().sendText(new Gson().toJson(action));
-//        } catch (IOException ex) {
-//            throw new DataAccessException(ex.getMessage());
-//        }
-//    }
-//
-//    public void leavePetShop(String visitorName) throws DataAccessException {
-//        try {
-//            var action = new Action(Action.Type.EXIT, visitorName);
-//            this.session.getBasicRemote().sendText(new Gson().toJson(action));
-//            this.session.close();
-//        } catch (IOException ex) {
-//            throw new DataAccessException(ex.getMessage());
-//        }
-//    }
 
 }
