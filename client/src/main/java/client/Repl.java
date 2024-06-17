@@ -1,5 +1,6 @@
 package client;
 
+import chess.ChessBoard;
 import chess.ChessGame;
 import client.websocket.NotificationHandler;
 import dtos.DataAccessException;
@@ -20,6 +21,7 @@ public class Repl implements NotificationHandler {
     private String username;
     private String authToken;
     private int inGame;
+    private ChessGame currentGame;
 
     public Repl(String serverUrl) {
         client = new ChessClient(serverUrl, this);
@@ -260,8 +262,8 @@ public class Repl implements NotificationHandler {
                     System.out.println("Go ahead and choose an option, you'll be given more instructions at that point.");
                     break;
                 case 2:
-                    System.out.println("Drawing initial state of chess game...");
-                    drawsBoard.draw(game, color);
+                    System.out.print("\n");
+                    drawsBoard.draw(currentGame, color);
                     System.out.print("\n");
                     break;
                 case 3:
@@ -285,6 +287,7 @@ public class Repl implements NotificationHandler {
     @Override
     public void drawBoard(ChessGame game) {
         String color = "";
+        currentGame = game;
         try {
             ListGamesResult allGames = client.listGames(authToken);
             for(ListGamesResult.GameSummary possibleGame : allGames.games()) {

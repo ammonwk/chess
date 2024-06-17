@@ -53,13 +53,19 @@ public class ChessClient {
 
     public JoinGameResult joinGame(String authToken, int gameId, String playerColor) throws DataAccessException {
         server = new ServerFacade(serverUrl);
-        webSocket.connect(authToken + "Bad", gameId);
-        return server.joinGame(new JoinGameRequest(authToken, gameId, playerColor));
+        JoinGameResult result = server.joinGame(new JoinGameRequest(authToken, gameId, playerColor));
+        webSocket.connect(authToken, gameId);
+        return result;
     }
 
     public void leaveGame(String authToken, int gameId) throws DataAccessException {
         server = new ServerFacade(serverUrl);
         webSocket.leave(authToken, gameId);
+    }
+
+    public void observeGame(String authToken, int gameId) throws DataAccessException {
+        server = new ServerFacade(serverUrl);
+        webSocket.connect(authToken, gameId);
     }
 
 }

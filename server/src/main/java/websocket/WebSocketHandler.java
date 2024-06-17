@@ -79,10 +79,24 @@ public class WebSocketHandler {
             return;
         }
         gameConnections.put(session.hashCode(), gameData.gameID());
-        var message = String.format("%s joined the game.", username);
+        String message;
+        if (gameData.whiteUsername().equals(username)) {
+            message = String.format("%s joined the game as White.", username);
+        } else if (gameData.blackUsername().equals(username)) {
+            message = String.format("%s joined the game as Black.", username);
+        } else {
+            message = String.format("%s joined the game as an observer.", username);
+        }
         var notification = new NotificationMessage(message);
-        List<Integer> toNotify = getUsernamesForGame(gameData.gameID());
-        toNotify.remove(session.hashCode());
+        List<Integer> toNotify;
+        try {
+            toNotify = getUsernamesForGame(gameData.gameID());
+            Integer hash = session.hashCode();
+            toNotify.remove(hash);
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
         connections.broadcastNotification(toNotify, notification);
         ChessGame game = gameData.game();
         connections.sendGame(connectCommand.getAuthString(),
