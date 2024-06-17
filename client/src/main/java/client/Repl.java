@@ -5,6 +5,7 @@ import client.websocket.NotificationHandler;
 import dtos.DataAccessException;
 import dtos.ListGamesResult;
 import model.GameData;
+import websocket.WebSocketHandler;
 import websocket.messages.NotificationMessage;
 
 import java.util.ArrayList;
@@ -264,6 +265,11 @@ public class Repl implements NotificationHandler {
                     System.out.print("\n");
                     break;
                 case 3:
+                    try {
+                        client.leaveGame(authToken, inGame);
+                    } catch (DataAccessException e) {
+                        System.out.println(SET_TEXT_COLOR_RED + "Error in leaving: " + e.getMessage() + SET_TEXT_COLOR_WHITE);
+                    }
                     inGame = 0;
                     System.out.println("Leaving game...\nGoodbye.");
                     break;
@@ -299,10 +305,10 @@ public class Repl implements NotificationHandler {
     }
 
     public void notify(NotificationMessage notification) {
-        System.out.println(SET_TEXT_COLOR_WHITE + notification + RESET_TEXT_COLOR);
+        System.out.println("\n" + SET_TEXT_COLOR_WHITE + notification);
     }
 
     public void error(NotificationMessage notification) {
-        System.out.println(SET_TEXT_COLOR_RED + notification + RESET_TEXT_COLOR);
+        System.out.println("\n" + SET_TEXT_COLOR_RED + notification + SET_TEXT_COLOR_WHITE);
     }
 }

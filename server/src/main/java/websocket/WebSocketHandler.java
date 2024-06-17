@@ -4,24 +4,31 @@ import chess.ChessGame;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dtos.DataAccessException;
+import model.AuthData;
 import model.GameData;
 import org.eclipse.jetty.io.EofException;
-import org.eclipse.jetty.util.IO;
 import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketError;
 import org.eclipse.jetty.websocket.api.annotations.OnWebSocketMessage;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
-import websocket.commands.ConnectCommand;
+import websocket.commands.*;
+import websocket.messages.ErrorMessage;
 import websocket.messages.NotificationMessage;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 
 
 @WebSocket
 public class WebSocketHandler {
 
     private final ConnectionManager connections = new ConnectionManager();
+    public final ConcurrentHashMap<Integer, Integer> gameConnections = new ConcurrentHashMap<>();
     private final DataAccess dataAccess;
 
     public WebSocketHandler(DataAccess dataAccess){
@@ -32,36 +39,91 @@ public class WebSocketHandler {
         if (message.contains("CONNECT")) {
             ConnectCommand command = new Gson().fromJson(message, ConnectCommand.class);
             connect(command, session);
-        }// else if (message.contains("MAKE_MOVE")) {
-//            MakeMoveCommand command = new Gson().fromJson(message, MakeMoveCommand.class);
-//            makeMove(command, session);
-//        } else if (message.contains("LEAVE")) {
-//            LeaveCommand command = new Gson().fromJson(message, LeaveCommand.class);
-//            Leave(command, session);
-//        } else if (message.contains("RESIGN")) {
-//            ResignCommand command = new Gson().fromJson(message, ResignCommand.class);
-//            Resign(command, session);
-//        }
+        } else if (message.contains("MAKE_MOVE")) {
+            MakeMoveCommand command = new Gson().fromJson(message, MakeMoveCommand.class);
+            //makeMove(command, session);
+        } else if (message.contains("LEAVE")) {
+            LeaveCommand command = new Gson().fromJson(message, LeaveCommand.class);
+            leave(command, session);
+        } else if (message.contains("RESIGN")) {
+            ResignCommand command = new Gson().fromJson(message, ResignCommand.class);
+            //resign(command, session);
+        }
+    }
+
+    public List<Integer> getUsernamesForGame(int thisGame) {
+        return gameConnections.entrySet().stream()
+                .filter(entry -> entry.getValue().equals(thisGame))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
     }
 
     private void connect(ConnectCommand connectCommand, Session session) {
+        connections.add(connectCommand.getAuthString(), session);
+        String username;
+        GameData gameData = null;
         try {
-            connections.add(connectCommand.getAuthString(), session);
-            String username = dataAccess.getAuth(connectCommand.getAuthString()).username();
-            var message = String.format("%s joined the game.", username);
-            var notification = new NotificationMessage(message);
-            connections.broadcast(connectCommand.getAuthString(), notification);
-            GameData gameData = dataAccess.getGame(connectCommand.getGameId());
-            ChessGame game = gameData.game();
-            connections.sendGame(connectCommand.getAuthString(),
-                    game);
-            System.out.println("Sent game: " + game.toString());
-            System.out.println("Sent notification: " + notification);
+            AuthData auth = dataAccess.getAuth(connectCommand.getAuthString());
+            if (auth == null) {
+                connections.returnError(session.hashCode(), new ErrorMessage("Error: Unauthorized."));
+                return;
+            }
+            username = auth.username();
+            gameData = dataAccess.getGame(connectCommand.getGameId());
+            if (gameData == null) {
+                connections.returnError(session.hashCode(), new ErrorMessage("Error: No game found."));
+                return;
+            }
         } catch (DataAccessException e) {
-            System.out.println("DataAccessException: " + e.getMessage());
-        } catch (IOException e) {
-            System.out.println("IOException: " + e.getMessage());
+            connections.returnError(session.hashCode(), new ErrorMessage("Error: Unauthorized."));
+            return;
         }
+        gameConnections.put(session.hashCode(), gameData.gameID());
+        var message = String.format("%s joined the game.", username);
+        var notification = new NotificationMessage(message);
+        List<Integer> toNotify = getUsernamesForGame(gameData.gameID());
+        toNotify.remove(session.hashCode());
+        connections.broadcastNotification(toNotify, notification);
+        ChessGame game = gameData.game();
+        connections.sendGame(connectCommand.getAuthString(),
+                game);
+        System.out.println("Sent game: " + game.toString());
+        System.out.println("Sent notification: " + notification);
+    }
+
+    private void leave(LeaveCommand leaveCommand, Session session) {
+        connections.remove(leaveCommand.getAuthString());
+        gameConnections.remove(leaveCommand.getAuthString());
+        GameData gameData = null;
+        String username;
+        try {
+            username = dataAccess.getAuth(leaveCommand.getAuthString()).username();
+            gameData = dataAccess.getGame(leaveCommand.getGameId());
+            if (gameData.whiteUsername().equals(username)) {
+                dataAccess.updateGame(
+                        new GameData(gameData.gameID(),
+                                null,
+                                gameData.blackUsername(),
+                                gameData.gameName(),
+                                gameData.game()));
+            } else if (gameData.blackUsername().equals(username)) {
+                dataAccess.updateGame(
+                        new GameData(gameData.gameID(),
+                                gameData.whiteUsername(),
+                                null,
+                                gameData.gameName(),
+                                gameData.game()));
+            }
+
+        } catch (DataAccessException e) {
+            connections.returnError(session.hashCode(), new ErrorMessage("Error: Could not connect."));
+            return;
+        }
+
+        var message = String.format("%s left the game.", username);
+        var notification = new NotificationMessage(message);
+        connections.broadcastNotification(getUsernamesForGame(gameData.gameID()), notification);
+        System.out.println("Sent notification: " + notification);
     }
 
     @OnWebSocketError

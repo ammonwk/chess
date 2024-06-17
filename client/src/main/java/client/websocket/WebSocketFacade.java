@@ -6,6 +6,7 @@ import client.Repl;
 import com.google.gson.Gson;
 import dtos.DataAccessException;
 import websocket.commands.ConnectCommand;
+import websocket.commands.LeaveCommand;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 import static ui.EscapeSequences.*;
@@ -62,6 +63,15 @@ public class WebSocketFacade extends Endpoint {
     public void connect(String authToken, int GameId) throws DataAccessException {
         try {
             ConnectCommand command = new ConnectCommand(authToken, GameId);
+            this.session.getBasicRemote().sendText(new Gson().toJson(command));
+        } catch (IOException e) {
+            throw new DataAccessException(e.getMessage());
+        }
+    }
+
+    public void leave(String authToken, int GameId) throws DataAccessException {
+        try {
+            LeaveCommand command = new LeaveCommand(authToken, GameId);
             this.session.getBasicRemote().sendText(new Gson().toJson(command));
         } catch (IOException e) {
             throw new DataAccessException(e.getMessage());

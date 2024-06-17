@@ -3,11 +3,13 @@ package websocket;
 import chess.ChessGame;
 import com.google.gson.Gson;
 import org.eclipse.jetty.websocket.api.Session;
+import websocket.messages.ErrorMessage;
 import websocket.messages.LoadGameMessage;
 import websocket.messages.NotificationMessage;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ConnectionManager {
@@ -22,12 +24,16 @@ public class ConnectionManager {
         connections.remove(username);
     }
 
-    public void sendGame(String userAuth, ChessGame game) throws IOException {
+    public void sendGame(String userAuth, ChessGame game) {
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
             if (c.session.isOpen()) {
                 if (userAuth.equals(c.username)) {
-                    c.send(new Gson().toJson(new LoadGameMessage(game)));
+                    try {
+                        c.send(new Gson().toJson(new LoadGameMessage(game)));
+                    } catch (IOException e) {
+                        throw new RuntimeException("Error when connecting: " + e.getMessage());
+                    }
                 }
             } else {
                 removeList.add(c);
@@ -40,12 +46,38 @@ public class ConnectionManager {
         }
     }
 
-    public void broadcast(String excludeVisitorName, NotificationMessage notification) throws IOException {
+    public void broadcastNotification(List<Integer> sessions, NotificationMessage notification) {
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
             if (c.session.isOpen()) {
-                if (!c.username.equals(excludeVisitorName)) {
-                    c.send(new Gson().toJson(notification, NotificationMessage.class));
+                if (sessions.contains(c.session.hashCode())) {
+                    try {
+                        c.send(new Gson().toJson(notification, NotificationMessage.class));
+                    } catch (IOException e) {
+                        throw new RuntimeException("Error when connecting: " + e.getMessage());
+                    }
+                }
+            } else {
+                removeList.add(c);
+            }
+        }
+
+        // Clean up any connections that were left open.
+        for (var c : removeList) {
+            connections.remove(c.username);
+        }
+    }
+
+    public void returnError (Integer session, ErrorMessage notification) {
+        var removeList = new ArrayList<Connection>();
+        for (var c : connections.values()) {
+            if (c.session.isOpen()) {
+                if (c.session.hashCode() == session) {
+                    try {
+                        c.send(new Gson().toJson(notification, ErrorMessage.class));
+                    } catch (IOException e) {
+                        throw new RuntimeException("Error when connecting: " + e.getMessage());
+                    }
                 }
             } else {
                 removeList.add(c);
