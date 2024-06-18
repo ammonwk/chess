@@ -32,7 +32,7 @@ public class ConnectionManager {
                     try {
                         c.send(new Gson().toJson(new LoadGameMessage(game)));
                     } catch (IOException e) {
-                        throw new RuntimeException("Error when connecting: " + e.getMessage());
+                        throw new RuntimeException("Error when connecting to sendGame: " + e.getMessage());
                     }
                 }
             } else {
@@ -54,7 +54,7 @@ public class ConnectionManager {
                     try {
                         c.send(new Gson().toJson(new LoadGameMessage(game)));
                     } catch (IOException e) {
-                        throw new RuntimeException("Error when connecting: " + e.getMessage());
+                        throw new RuntimeException("Error when connecting to gameChange: " + e.getMessage());
                     }
                 }
             } else {

@@ -144,65 +144,10 @@ public class Repl implements NotificationHandler {
                     }
                     break;
                 case 5:
-                    System.out.println("Of the following games,");
-                    try {
-                        ListGamesResult games = client.listGames(authToken);
-                        if(games.games().isEmpty()) {
-                            System.out.println("There are currently no active games. Create a game before trying to join one.");
-                        } else {
-                            int i = 0;
-                            for (ListGamesResult.GameSummary game : games.games()) {
-                                i = i + 1;
-                                System.out.println(Integer.toString(i) + ") " + game.gameName()
-                                        + " (White user: " + game.whiteUsername() + ", Black user: " + game.blackUsername() + ")");
-                            }
-                            System.out.print("Write a number for which game you would like to join:\n> ");
-                            //int toJoin = scanner.nextInt();
-                            ListGamesResult.GameSummary game = games.games().get(scanner.nextInt() - 1);
-                            String joinColor;
-                            if(game.whiteUsername() == null && game.blackUsername() == null) {
-                                System.out.print("Enter 1 to join as white, or 2 to join as black:\n> ");
-                                joinColor = scanner.nextInt() == 1 ? "WHITE" : "BLACK";
-                            } else if (game.whiteUsername() == null) {
-                                joinColor = "WHITE";
-                            } else if (game.blackUsername() == null) {
-                                joinColor = "BLACK";
-                            } else {
-                                System.out.println("That game is full. White is played by " + game.whiteUsername()
-                                        + ", and Black is played by " + game.blackUsername());
-                                break;
-                            }
-                            client.joinGame(authToken, game.gameID(), joinColor);
-                            System.out.println("Successfully joined " + game.gameName() + " as " + joinColor);
-                            inGame = game.gameID();
-                        }
-                    } catch (DataAccessException e) {
-                        System.out.println(SET_TEXT_COLOR_RED + "Error in joining: " + e.getMessage() + SET_TEXT_COLOR_WHITE);
-                    }
+                    handlePlayGame(scanner);
                     break;
                 case 6:
-                    System.out.println("Of the following games,");
-                    try {
-                        ListGamesResult games = client.listGames(authToken);
-                        if(games.games().isEmpty()) {
-                            System.out.println("There are currently no active games. Create a game before trying to join one.");
-                        } else {
-                            int i = 0;
-                            for (ListGamesResult.GameSummary game : games.games()) {
-                                i = i + 1;
-                                System.out.println(Integer.toString(i) + ") " + game.gameName()
-                                        + " (White user: " + game.whiteUsername() + ", Black user: " + game.blackUsername() + ")");
-                            }
-                            System.out.print("Write a number for which game you would like to observe:\n> ");
-                            //int toJoin = scanner.nextInt();
-                            ListGamesResult.GameSummary game = games.games().get(scanner.nextInt() - 1);
-                            System.out.println("Observing " + game.gameName() + " as WHITE");
-                            client.observeGame(authToken, game.gameID());
-                            // inGame = game.gameID();
-                        }
-                    } catch (DataAccessException e) {
-                        System.out.println(SET_TEXT_COLOR_RED + "Error in joining: " + e.getMessage() + SET_TEXT_COLOR_WHITE);
-                    }
+                    handleObserveGame(scanner);
                     break;
                 default:
                     System.out.println("Invalid choice. Please select a number between 1 and 4");
@@ -210,6 +155,69 @@ public class Repl implements NotificationHandler {
         } catch (InputMismatchException e) {
             System.out.println("Invalid input. Please enter a number.");
             scanner.next(); // clear the invalid input
+        }
+    }
+
+    private void handleObserveGame(Scanner scanner) {
+        System.out.println("Of the following games,");
+        try {
+            ListGamesResult games = client.listGames(authToken);
+            if(games.games().isEmpty()) {
+                System.out.println("There are currently no active games. Create a game before trying to join one.");
+            } else {
+                int i = 0;
+                for (ListGamesResult.GameSummary game : games.games()) {
+                    i = i + 1;
+                    System.out.println(Integer.toString(i) + ") " + game.gameName()
+                            + " (White user: " + game.whiteUsername() + ", Black user: " + game.blackUsername() + ")");
+                }
+                System.out.print("Write a number for which game you would like to observe:\n> ");
+                //int toJoin = scanner.nextInt();
+                ListGamesResult.GameSummary game = games.games().get(scanner.nextInt() - 1);
+                System.out.println("Observing " + game.gameName() + " as WHITE");
+                client.observeGame(authToken, game.gameID());
+                // inGame = game.gameID();
+            }
+        } catch (DataAccessException e) {
+            System.out.println(SET_TEXT_COLOR_RED + "Error in joining: " + e.getMessage() + SET_TEXT_COLOR_WHITE);
+        }
+    }
+
+    private void handlePlayGame(Scanner scanner) {
+        System.out.println("Of the following games,");
+        try {
+            ListGamesResult games = client.listGames(authToken);
+            if(games.games().isEmpty()) {
+                System.out.println("There are currently no active games. Create a game before trying to join one.");
+            } else {
+                int i = 0;
+                for (ListGamesResult.GameSummary game : games.games()) {
+                    i = i + 1;
+                    System.out.println(Integer.toString(i) + ") " + game.gameName()
+                            + " (White user: " + game.whiteUsername() + ", Black user: " + game.blackUsername() + ")");
+                }
+                System.out.print("Write a number for which game you would like to join:\n> ");
+                //int toJoin = scanner.nextInt();
+                ListGamesResult.GameSummary game = games.games().get(scanner.nextInt() - 1);
+                String joinColor;
+                if(game.whiteUsername() == null && game.blackUsername() == null) {
+                    System.out.print("Enter 1 to join as white, or 2 to join as black:\n> ");
+                    joinColor = scanner.nextInt() == 1 ? "WHITE" : "BLACK";
+                } else if (game.whiteUsername() == null) {
+                    joinColor = "WHITE";
+                } else if (game.blackUsername() == null) {
+                    joinColor = "BLACK";
+                } else {
+                    System.out.println("That game is full. White is played by " + game.whiteUsername()
+                            + ", and Black is played by " + game.blackUsername());
+                    return;
+                }
+                client.joinGame(authToken, game.gameID(), joinColor);
+                System.out.println("Successfully joined " + game.gameName() + " as " + joinColor);
+                inGame = game.gameID();
+            }
+        } catch (DataAccessException e) {
+            System.out.println(SET_TEXT_COLOR_RED + "Error in joining: " + e.getMessage() + SET_TEXT_COLOR_WHITE);
         }
     }
 
