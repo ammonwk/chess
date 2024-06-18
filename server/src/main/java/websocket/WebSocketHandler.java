@@ -1,6 +1,8 @@
 package websocket;
 
 import chess.ChessGame;
+import chess.ChessMove;
+import chess.InvalidMoveException;
 import com.google.gson.Gson;
 import dataaccess.DataAccess;
 import dtos.DataAccessException;
@@ -17,6 +19,7 @@ import websocket.messages.NotificationMessage;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -41,7 +44,7 @@ public class WebSocketHandler {
             connect(command, session);
         } else if (message.contains("MAKE_MOVE")) {
             MakeMoveCommand command = new Gson().fromJson(message, MakeMoveCommand.class);
-            //makeMove(command, session);
+            makeMove(command, session);
         } else if (message.contains("LEAVE")) {
             LeaveCommand command = new Gson().fromJson(message, LeaveCommand.class);
             leave(command, session);
@@ -59,21 +62,12 @@ public class WebSocketHandler {
     }
 
     private void connect(ConnectCommand connectCommand, Session session) {
-        connections.add(connectCommand.getAuthString(), session);
+        GameData gameData;
         String username;
-        GameData gameData = null;
+        connections.add(connectCommand.getAuthString(), session);
         try {
-            AuthData auth = dataAccess.getAuth(connectCommand.getAuthString());
-            if (auth == null) {
-                connections.returnError(session.hashCode(), new ErrorMessage("Error: Unauthorized."));
-                return;
-            }
-            username = auth.username();
-            gameData = dataAccess.getGame(connectCommand.getGameId());
-            if (gameData == null) {
-                connections.returnError(session.hashCode(), new ErrorMessage("Error: No game found."));
-                return;
-            }
+            gameData = getGameData(connectCommand.getAuthString(), connectCommand.gameId, session);
+            username = dataAccess.getAuth(connectCommand.getAuthString()).username();
         } catch (DataAccessException e) {
             connections.returnError(session.hashCode(), new ErrorMessage("Error: Unauthorized."));
             return;
@@ -81,14 +75,9 @@ public class WebSocketHandler {
         gameConnections.put(session.hashCode(), gameData.gameID());
         var notification = getNotificationMessage(gameData, username);
         List<Integer> toNotify;
-        try {
-            toNotify = getUsernamesForGame(gameData.gameID());
-            Integer hash = session.hashCode();
-            toNotify.remove(hash);
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
+        toNotify = getUsernamesForGame(gameData.gameID());
+        Integer hash = session.hashCode();
+        toNotify.remove(hash);
         connections.broadcastNotification(toNotify, notification);
         ChessGame game = gameData.game();
         connections.sendGame(connectCommand.getAuthString(),
@@ -112,7 +101,7 @@ public class WebSocketHandler {
 
     private void leave(LeaveCommand leaveCommand, Session session) {
         connections.remove(leaveCommand.getAuthString());
-        gameConnections.remove(leaveCommand.getAuthString());
+        gameConnections.remove(session.hashCode());
         GameData gameData = null;
         String username;
         try {
@@ -143,6 +132,54 @@ public class WebSocketHandler {
         var notification = new NotificationMessage(message);
         connections.broadcastNotification(getUsernamesForGame(gameData.gameID()), notification);
         System.out.println("Sent notification: " + notification);
+    }
+
+    private GameData getGameData(String authString, Integer gameId, Session session) throws DataAccessException {
+        String username;
+        GameData gameData;
+        AuthData auth = dataAccess.getAuth(authString);
+        if (auth == null) {
+            connections.returnError(session.hashCode(), new ErrorMessage("Error: Unauthorized."));
+            return null;
+        }
+        username = auth.username();
+        gameData = dataAccess.getGame(gameId);
+        if (gameData == null) {
+            connections.returnError(session.hashCode(), new ErrorMessage("Error: No game found."));
+            return null;
+        }
+
+        return gameData;
+    }
+
+    private void makeMove(MakeMoveCommand moveCommand, Session session) {
+        GameData gameData;
+        String username;
+        try {
+            gameData = getGameData(moveCommand.getAuthString(), moveCommand.gameId, session);
+            username = dataAccess.getAuth(moveCommand.getAuthString()).username();
+            ChessGame.TeamColor color = gameData.whiteUsername().equals(username) ? ChessGame.TeamColor.WHITE : ChessGame.TeamColor.BLACK;
+            ChessGame.TeamColor turn = gameData.game().getTeamTurn();
+            if(color != turn) {
+                connections.returnError(session.hashCode(), new ErrorMessage("Error: It is not your turn."));
+                return;
+            }
+            try {
+                gameData.game().makeMove(moveCommand.move);
+                gameData.game().setTeamTurn(turn == ChessGame.TeamColor.WHITE ? ChessGame.TeamColor.BLACK : ChessGame.TeamColor.WHITE);
+                dataAccess.updateGame(gameData);
+                List<Integer> toNotify;
+                toNotify = getUsernamesForGame(gameData.gameID());
+                connections.broadcastGameChange(toNotify, gameData.game());
+            } catch (InvalidMoveException e) {
+                connections.returnError(session.hashCode(), new ErrorMessage("Error: Invalid Move."));
+                return;
+            }
+        } catch (DataAccessException e) {
+            connections.returnError(session.hashCode(), new ErrorMessage("Error: Unauthorized."));
+            return;
+        }
+
     }
 
     @OnWebSocketError

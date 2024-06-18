@@ -1,15 +1,12 @@
 package client;
 
-import chess.ChessBoard;
-import chess.ChessGame;
+import chess.*;
 import client.websocket.NotificationHandler;
 import dtos.DataAccessException;
 import dtos.ListGamesResult;
-import model.GameData;
-import websocket.WebSocketHandler;
+import websocket.messages.ErrorMessage;
 import websocket.messages.NotificationMessage;
 
-import java.util.ArrayList;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
@@ -276,6 +273,38 @@ public class Repl implements NotificationHandler {
                     inGame = 0;
                     System.out.println("Leaving game...\nGoodbye.");
                     break;
+                case 4:
+                    Boolean validMove = false;
+                    ChessMove parsedMove = null;
+                    while (!validMove) {
+                        System.out.println("Print your move. E.g. b2:b3\nIf you are promoting a pawn, say f7:f8:q, for example, for a queen.");
+                        String move = scanner.next();
+                        try {
+                            ChessPosition startingPosition = new ChessPosition(move.charAt(1) - '0', move.charAt(0) - 'a' + 1);
+                            ChessPosition endingPosition = new ChessPosition(move.charAt(4) - '0', move.charAt(3) - 'a' + 1);
+                            ChessPiece.PieceType promotion = null;
+                            if(move.length() > 6) {
+                                switch (Character.toLowerCase(move.charAt(6))) {
+                                    case 'r' -> promotion = ChessPiece.PieceType.ROOK;
+                                    case 'n' -> promotion = ChessPiece.PieceType.KNIGHT;
+                                    case 'b' -> promotion = ChessPiece.PieceType.BISHOP;
+                                    case 'q' -> promotion = ChessPiece.PieceType.QUEEN;
+                                    default -> promotion = null;
+                                }
+                            }
+                            parsedMove = new ChessMove(startingPosition, endingPosition, promotion);
+                            validMove = true;
+                        } catch (Exception e) {
+                            System.out.println(SET_TEXT_COLOR_RED + "I couldn't parse that. Please follow the format g1:f3, etc." + SET_TEXT_COLOR_WHITE);
+                        }
+                    }
+                    try {
+                        client.makeMove(authToken, inGame, parsedMove);
+                    } catch (DataAccessException e) {
+                        System.out.println(SET_TEXT_COLOR_RED + "Error in move: " + e.getMessage() + SET_TEXT_COLOR_WHITE);
+                    }
+
+                    break;
                 default:
                     System.out.println("Invalid input. Please enter a number.");
             }
@@ -313,7 +342,7 @@ public class Repl implements NotificationHandler {
         System.out.println("\n" + SET_TEXT_COLOR_WHITE + notification);
     }
 
-    public void error(NotificationMessage notification) {
-        System.out.println("\n" + SET_TEXT_COLOR_RED + notification + SET_TEXT_COLOR_WHITE);
+    public void error(ErrorMessage errorMessage) {
+        System.out.println("\n" + SET_TEXT_COLOR_RED + errorMessage + SET_TEXT_COLOR_WHITE);
     }
 }

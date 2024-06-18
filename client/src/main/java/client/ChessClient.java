@@ -1,9 +1,9 @@
 package client;
 
+import chess.ChessMove;
 import client.websocket.NotificationHandler;
 import client.websocket.WebSocketFacade;
 import dtos.*;
-import model.GameData;
 
 public class ChessClient {
     private ServerFacade server;
@@ -66,6 +66,11 @@ public class ChessClient {
     public void observeGame(String authToken, int gameId) throws DataAccessException {
         server = new ServerFacade(serverUrl);
         webSocket.connect(authToken, gameId);
+    }
+
+    public void makeMove(String authToken, int gameId, ChessMove move) throws DataAccessException {
+        server = new ServerFacade(serverUrl);
+        webSocket.makeMove(authToken, gameId, move);
     }
 
 }

@@ -46,6 +46,28 @@ public class ConnectionManager {
         }
     }
 
+    public void broadcastGameChange(List<Integer> sessions, ChessGame game) {
+        var removeList = new ArrayList<Connection>();
+        for (var c : connections.values()) {
+            if (c.session.isOpen()) {
+                if (sessions.contains(c.session.hashCode())) {
+                    try {
+                        c.send(new Gson().toJson(new LoadGameMessage(game)));
+                    } catch (IOException e) {
+                        throw new RuntimeException("Error when connecting: " + e.getMessage());
+                    }
+                }
+            } else {
+                removeList.add(c);
+            }
+        }
+
+        // Clean up any connections that were left open.
+        for (var c : removeList) {
+            connections.remove(c.username);
+        }
+    }
+
     public void broadcastNotification(List<Integer> sessions, NotificationMessage notification) {
         var removeList = new ArrayList<Connection>();
         for (var c : connections.values()) {
